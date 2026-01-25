@@ -82,13 +82,13 @@ export function HomePage() {
           <input
             type="search"
             placeholder="搜索"
-            className="w-full text-[14px] font-normal placeholder:text-muted focus:outline-none"
+            className="w-full typo-control-input placeholder:text-muted focus:outline-none"
           />
         </div>
-        <button className="px-4 rounded-full bg-primary text-[14px] font-medium text-white hover:bg-primary/90 transition-colors cursor-pointer">
+        <button className="px-4 rounded-full bg-primary typo-control-filter text-white hover:bg-primary/90 transition-colors cursor-pointer">
           最新
         </button>
-        <button className="px-4 rounded-full border border-muted text-[14px] font-medium text-muted transition-colors hover:border-primary hover:text-primary hover:bg-primary/5 cursor-pointer">
+        <button className="px-4 rounded-full border border-muted typo-control-filter text-muted transition-colors hover:border-primary hover:text-primary hover:bg-primary/5 cursor-pointer">
           最热
         </button>
       </div>
@@ -99,7 +99,7 @@ export function HomePage() {
             id="post-content"
             name="post-content"
             placeholder="分享你的新鲜事..."
-            className="min-h-20 w-full resize-none overflow-hidden bg-transparent text-[16px] font-medium placeholder:text-muted focus-visible:outline-none border-none"
+            className="min-h-20 w-full resize-none overflow-hidden bg-transparent typo-composer-body placeholder:text-muted focus-visible:outline-none border-none"
           />
           <div className="flex items-center gap-4 text-primary">
             <button className="flex items-center gap-1 transition-colors hover:text-primary/80 cursor-pointer">
@@ -120,10 +120,10 @@ export function HomePage() {
 
             <div className="flex-1" />
 
-            <button className="px-4 rounded-full border border-primary text-[14px] font-medium transition-colors hover:bg-primary/10 cursor-pointer">
+            <button className="px-4 rounded-full border border-primary typo-control-action transition-colors hover:bg-primary/10 cursor-pointer">
               发布
             </button>
-            <button className="px-4 rounded-full border border-primary text-[14px] font-medium transition-colors hover:bg-primary/10 cursor-pointer">
+            <button className="px-4 rounded-full border border-primary typo-control-action transition-colors hover:bg-primary/10 cursor-pointer">
               草稿
             </button>
           </div>
@@ -135,8 +135,8 @@ export function HomePage() {
           <header className="flex gap-2 items-center w-full">
             <img src={post.avatar} className="h-10 w-10 rounded-full" />
             <div>
-              <div className="text-[14px] font-medium">{post.author}</div>
-              <button className="text-xs font-normal text-muted transition-colors hover:text-primary cursor-pointer">
+              <div className="typo-post-author">{post.author}</div>
+              <button className="typo-meta-timestamp text-muted transition-colors hover:text-primary cursor-pointer">
                 {post.time}
               </button>
             </div>
@@ -145,12 +145,12 @@ export function HomePage() {
 
           <div className="pl-8 space-y-2">
             {/* text */}
-            <div className="text-[16px] font-medium">{post.text}</div>
+            <div className="typo-post-body">{post.text}</div>
 
             {/* tags */}
             <div className="flex gap-2">
               {post.tags.map((tag) => (
-                <button className="text-[14px] font-medium text-primary cursor-pointer transition-colors hover:text-primary/80">
+                <button className="typo-post-tag text-primary cursor-pointer transition-colors hover:text-primary/80">
                   # {tag}
                 </button>
               ))}
@@ -180,10 +180,10 @@ export function HomePage() {
                       <FileText className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <div className="text-[14px] font-medium">
+                      <div className="typo-attachment-name">
                         {attachment.name}
                       </div>
-                      <div className="text-[12px] font-normal text-muted">
+                      <div className="typo-meta-filesize text-muted">
                         {attachment.size}
                       </div>
                     </div>
@@ -199,17 +199,17 @@ export function HomePage() {
             <footer className="flex items-center gap-4 text-muted">
               <button className="flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
                 <Heart className="h-4 w-4" />
-                <div className="text-[14px] font-medium">{post.likes}</div>
+                <div className="typo-post-metric">{post.likes}</div>
               </button>
 
               <button className="flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
                 <MessageCircleMore className="h-4 w-4" />
-                <div className="text-[14px] font-medium">{post.comments}</div>
+                <div className="typo-post-metric">{post.comments}</div>
               </button>
 
               <button className="flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
                 <Bookmark className="h-4 w-4" />
-                <div className="text-[14px] font-medium">{post.comments}</div>
+                <div className="typo-post-metric">{post.comments}</div>
               </button>
 
               <button className="ml-auto flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">

@@ -1,6 +1,7 @@
 import { Birdhouse, Hash, LogOut, MessageCircle, User } from "lucide-react";
 import icon from "./assets/icon.svg";
 import { HomePage } from "./pages/HomePage";
+import './App.css'
 
 const trendingTopics = [
   { title: "期末考试", count: 220 },
@@ -23,25 +24,25 @@ function App() {
           <nav className="space-y-4">
             <button className="flex items-center w-full p-4 gap-4 text-primary bg-surface-subtle/50 rounded-lg hover:bg-surface-subtle/70 transition-colors cursor-pointer">
               <Birdhouse className="h-6 w-6" />
-              <div className="text-[16px] font-medium">首页</div>
+              <div className="typo-nav-item">首页</div>
             </button>
             <button className="flex items-center w-full p-4 gap-4 text-muted rounded-lg hover:bg-surface-subtle/70 transition-colors cursor-pointer">
               <Hash className="h-6 w-6" />
-              <div className="text-[16px] font-medium">话题</div>
+              <div className="typo-nav-item">话题</div>
             </button>
             <button className="flex items-center w-full p-4 gap-4 text-muted rounded-lg hover:bg-surface-subtle/70 transition-colors cursor-pointer">
               <MessageCircle className="h-6 w-6" />
-              <div className="text-[16px] font-medium">消息</div>
+              <div className="typo-nav-item">消息</div>
             </button>
             <button className="flex items-center w-full p-4 gap-4 text-muted rounded-lg hover:bg-surface-subtle/70 transition-colors cursor-pointer">
               <User className="h-6 w-6" />
-              <div className="text-[16px] font-medium">我的</div>
+              <div className="typo-nav-item">我的</div>
             </button>
           </nav>
 
           <button className="mt-auto flex items-center w-full p-4 gap-4 text-muted rounded-lg transition-colors hover:text-danger hover:bg-danger/5 focus-visible:text-danger focus-visible:bg-danger/10 focus-visible:outline-none cursor-pointer">
             <LogOut className="h-6 w-6" />
-            <div className="text-[16px] font-medium">退出登录</div>
+            <div className="typo-nav-action">退出登录</div>
           </button>
         </aside>
 
@@ -53,21 +54,21 @@ function App() {
           <div className="p-4 space-y-4 bg-surface rounded-lg">
             <header className="flex items-center gap-4">
               <Hash className="h-6 w-6 text-primary" />
-              <div className="text-[16px] font-medium">热门话题</div>
+              <div className="typo-sidebar-title">热门话题</div>
             </header>
             {trendingTopics.map((tag) => (
               <button className="flex w-full items-center transition-colors hover:text-primary cursor-pointer">
-                <div className="text-[14px] font-medium"># {tag.title}</div>
-                <div className="ml-auto text-[14px] font-medium text-muted">
+                <div className="typo-sidebar-item"># {tag.title}</div>
+                <div className="ml-auto typo-sidebar-item text-muted">
                   {tag.count}
                 </div>
               </button>
             ))}
-            <button className="w-full text-[14px] font-medium text-muted transition-colors hover:text-primary cursor-pointer">
+            <button className="w-full typo-sidebar-more text-muted transition-colors hover:text-primary cursor-pointer">
               查看更多
             </button>
           </div>
-          <footer className="py-4 text-[12px] font-normal text-muted">
+          <footer className="py-4 typo-sidebar-footer text-muted">
             <div className="flex gap-4">
               <button className="transition-colors hover:text-foreground cursor-pointer">
                 隐私政策

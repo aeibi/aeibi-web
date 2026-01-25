@@ -1,42 +1,26 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+@import "tailwindcss";
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
+@layer components {
+  /* 16/24 + medium */
+  .typo-nav-item        { @apply text-base/6 font-medium; }
+  .typo-nav-action      { @apply text-base/6 font-medium; }
+  .typo-sidebar-title   { @apply text-base/6 font-medium; }
+  .typo-composer-body   { @apply text-base/6 font-medium; }
+  .typo-post-body       { @apply text-base/6 font-medium; }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+  /* 14/20 + medium */
+  .typo-control-input   { @apply text-sm/5 font-medium; }
+  .typo-control-filter  { @apply text-sm/5 font-medium; }
+  .typo-control-action  { @apply text-sm/5 font-medium; }
+  .typo-post-author     { @apply text-sm/5 font-medium; }
+  .typo-post-tag        { @apply text-sm/5 font-medium; }
+  .typo-attachment-name { @apply text-sm/5 font-medium; }
+  .typo-post-metric     { @apply text-sm/5 font-medium; }
+  .typo-sidebar-item    { @apply text-sm/5 font-medium; }
+  .typo-sidebar-more    { @apply text-sm/5 font-medium; }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  /* 12/16 + normal */
+  .typo-meta-timestamp  { @apply text-xs/4 font-normal; }
+  .typo-meta-filesize   { @apply text-xs/4 font-normal; }
+  .typo-sidebar-footer  { @apply text-xs/4 font-normal; }
 }
