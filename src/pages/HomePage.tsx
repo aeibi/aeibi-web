@@ -13,6 +13,7 @@ import {
   Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUserServiceGetMe } from "@/api/generated";
 
 const mockPosts = [
   {
@@ -69,11 +70,8 @@ const mockPosts = [
   },
 ];
 
-const mockUser = {
-  avatar: "https://api.dicebear.com/9.x/thumbs/svg?seed=quiet",
-};
-
 export function HomePage() {
+  const { data: me, isSuccess } = useUserServiceGetMe();
   return (
     <div className="space-y-4">
       <div className="flex gap-2 items-center">
@@ -93,7 +91,7 @@ export function HomePage() {
         </button>
       </div>
       <div className="flex p-4 gap-2 bg-surface rounded-lg">
-        <img src={mockUser.avatar} className="h-10 w-10 rounded-full" />
+        {isSuccess && <img src={me.user.avatarUrl} className="h-10 w-10 rounded-full" />}
         <div className="space-y-2 w-full">
           <textarea
             id="post-content"
