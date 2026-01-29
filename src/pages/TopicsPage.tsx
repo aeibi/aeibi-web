@@ -1,6 +1,3 @@
 export function TopicsPage() {
-  return (
-    <div>
-    </div>
-  )
+  return <div></div>;
 }

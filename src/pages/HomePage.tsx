@@ -1,21 +1,19 @@
+import { SidebarFooter } from "@/components/SidebarFooter";
+import { PostCard, type PostData } from "@/components/PostCard";
 import {
-  Paperclip,
-  Hash,
-  Smile,
-  Image,
-  MoreHorizontal,
-  Bookmark,
-  Download,
-  FileText,
-  Heart,
-  MessageCircleMore,
-  Share2,
-  Search,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useUserServiceGetMe } from "@/api/generated";
+  TrendingTopicsCard,
+  type TrendingTopic,
+} from "@/components/TrendingTopicsCard";
+import {
+  PostComposer,
+  type PostComposerContent,
+} from "@/components/PostComposer";
+import { SearchBar } from "@/components/SearchBar";
+import { FeedSortButtons } from "@/components/FeedSortButtons";
+import { getFileUrl } from "@/lib/file";
+import { usePostServiceCreatePost, useUserServiceGetMe } from "@/api/generated";
 
-const mockPosts = [
+const mockPosts: PostData[] = [
   {
     id: "post-1",
     author: "自由树",
@@ -70,153 +68,59 @@ const mockPosts = [
   },
 ];
 
+const trendingTopics: TrendingTopic[] = [
+  { title: "期末考试", count: 220 },
+  { title: "生活碎片", count: 127 },
+  { title: "学习资料", count: 98 },
+  { title: "二手书交易", count: 51 },
+  { title: "学科竞赛", count: 25 },
+  { title: "英语选课", count: 25 },
+  { title: "社团纳新", count: 15 },
+  { title: "校园指南", count: 15 },
+];
+
 export function HomePage() {
   const { data: me, isSuccess } = useUserServiceGetMe();
+  const { mutate: createPost } = usePostServiceCreatePost();
+
+  const handleCreatePost = (content: PostComposerContent) => {
+    createPost({
+      data: {
+        text: content.text,
+        tags: content.tags,
+        images: content.images,
+        attachments: content.attachments,
+        visibility: "PUBLIC",
+      },
+    });
+  };
+
+  const handleSaveDraft = (content: PostComposerContent) => {};
+
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2 items-center">
-        <div className="flex-1 flex px-4 py-1 gap-2 bg-surface rounded-lg">
-          <Search className="h-5 w-5 text-muted" />
-          <input
-            type="search"
-            placeholder="搜索"
-            className="w-full typo-control-input placeholder:text-muted focus:outline-none"
-          />
-        </div>
-        <button className="px-4 rounded-full bg-primary typo-control-filter text-white hover:bg-primary/90 transition-colors cursor-pointer">
-          最新
-        </button>
-        <button className="px-4 rounded-full border border-muted typo-control-filter text-muted transition-colors hover:border-primary hover:text-primary hover:bg-primary/5 cursor-pointer">
-          最热
-        </button>
-      </div>
-      <div className="flex p-4 gap-2 bg-surface rounded-lg">
-        {isSuccess && <img src={me.user.avatarUrl} className="h-10 w-10 rounded-full" />}
-        <div className="space-y-2 w-full">
-          <textarea
-            id="post-content"
-            name="post-content"
-            placeholder="分享你的新鲜事..."
-            className="min-h-20 w-full resize-none overflow-hidden bg-transparent typo-composer-body placeholder:text-muted focus-visible:outline-none border-none"
-          />
-          <div className="flex items-center gap-4 text-primary">
-            <button className="flex items-center gap-1 transition-colors hover:text-primary/80 cursor-pointer">
-              <Paperclip className="h-5 w-5" />
-            </button>
-
-            <button className="flex items-center gap-1 transition-colors hover:text-primary/80 cursor-pointer">
-              <Image className="h-5 w-5" />
-            </button>
-
-            <button className="flex items-center gap-1 transition-colors hover:text-primary/80 cursor-pointer">
-              <Hash className="h-5 w-5" />
-            </button>
-
-            <button className="flex items-center gap-1 transition-colors hover:text-primary/80 cursor-pointer">
-              <Smile className="h-5 w-5" />
-            </button>
-
-            <div className="flex-1" />
-
-            <button className="px-4 rounded-full border border-primary typo-control-action transition-colors hover:bg-primary/10 cursor-pointer">
-              发布
-            </button>
-            <button className="px-4 rounded-full border border-primary typo-control-action transition-colors hover:bg-primary/10 cursor-pointer">
-              草稿
-            </button>
+    <div className="flex gap-8">
+      <div className="w-2xl space-y-4">
+        <div className="flex gap-2 items-center">
+          <div className="flex-1">
+            <SearchBar />
           </div>
+          <FeedSortButtons />
         </div>
+        {isSuccess && (
+          <PostComposer
+            avatar={getFileUrl(me.user.avatarUrl)}
+            onPublish={handleCreatePost}
+            onSaveDraft={handleSaveDraft}
+          />
+        )}
+        {mockPosts.map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
       </div>
-      {mockPosts.map((post) => (
-        <article className="p-4 space-y-4 bg-surface rounded-lg">
-          {/* header */}
-          <header className="flex gap-2 items-center w-full">
-            <img src={post.avatar} className="h-10 w-10 rounded-full" />
-            <div>
-              <div className="typo-post-author">{post.author}</div>
-              <button className="typo-meta-timestamp text-muted transition-colors hover:text-primary cursor-pointer">
-                {post.time}
-              </button>
-            </div>
-            <MoreHorizontal className="ml-auto h-4 w-4 text-muted cursor-pointer transition-colors hover:text-primary" />
-          </header>
-
-          <div className="pl-8 space-y-2">
-            {/* text */}
-            <div className="typo-post-body">{post.text}</div>
-
-            {/* tags */}
-            <div className="flex gap-2">
-              {post.tags.map((tag) => (
-                <button className="typo-post-tag text-primary cursor-pointer transition-colors hover:text-primary/80">
-                  # {tag}
-                </button>
-              ))}
-            </div>
-
-            {/* images */}
-            {post.images && (
-              <div
-                className={cn("grid gap-2", {
-                  "grid-cols-2": post.images.length > 1,
-                })}
-              >
-                {post.images.slice(0, 4).map((src) => (
-                  <div className="aspect-18/10 overflow-hidden rounded-lg">
-                    <img src={src} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* attachments */}
-            {post.attachments && post.attachments.length > 0 && (
-              <div className="space-y-2">
-                {post.attachments.map((attachment) => (
-                  <div className="flex items-center gap-4 p-2 bg-surface-subtle rounded-lg">
-                    <div className="p-2 bg-surface rounded-lg">
-                      <FileText className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <div className="typo-attachment-name">
-                        {attachment.name}
-                      </div>
-                      <div className="typo-meta-filesize text-muted">
-                        {attachment.size}
-                      </div>
-                    </div>
-                    <button className="ml-auto p-2 text-muted transition-colors hover:text-primary cursor-pointer">
-                      <Download className="h-4 w-4 text-current" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* actions */}
-            <footer className="flex items-center gap-4 text-muted">
-              <button className="flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
-                <Heart className="h-4 w-4" />
-                <div className="typo-post-metric">{post.likes}</div>
-              </button>
-
-              <button className="flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
-                <MessageCircleMore className="h-4 w-4" />
-                <div className="typo-post-metric">{post.comments}</div>
-              </button>
-
-              <button className="flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
-                <Bookmark className="h-4 w-4" />
-                <div className="typo-post-metric">{post.comments}</div>
-              </button>
-
-              <button className="ml-auto flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
-                <Share2 className="h-4 w-4" />
-              </button>
-            </footer>
-          </div>
-        </article>
-      ))}
+      <div className="w-64 shrink-0 sticky top-0 self-start">
+        <TrendingTopicsCard topics={trendingTopics} />
+        <SidebarFooter />
+      </div>
     </div>
   );
 }

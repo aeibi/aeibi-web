@@ -1,26 +1,75 @@
 @import "tailwindcss";
 
 @layer components {
+
   /* 16/24 + medium */
-  .typo-nav-item        { @apply text-base/6 font-medium; }
-  .typo-nav-action      { @apply text-base/6 font-medium; }
-  .typo-sidebar-title   { @apply text-base/6 font-medium; }
-  .typo-composer-body   { @apply text-base/6 font-medium; }
-  .typo-post-body       { @apply text-base/6 font-medium; }
+  .typo-nav-item {
+    @apply text-base/6 font-medium;
+  }
+
+  .typo-nav-action {
+    @apply text-base/6 font-medium;
+  }
+
+  .typo-sidebar-title {
+    @apply text-base/6 font-medium;
+  }
+
+  .typo-composer-body {
+    @apply text-base/6 font-medium;
+  }
+
+  .typo-post-body {
+    @apply text-base/6 font-medium;
+  }
 
   /* 14/20 + medium */
-  .typo-control-input   { @apply text-sm/5 font-medium; }
-  .typo-control-filter  { @apply text-sm/5 font-medium; }
-  .typo-control-action  { @apply text-sm/5 font-medium; }
-  .typo-post-author     { @apply text-sm/5 font-medium; }
-  .typo-post-tag        { @apply text-sm/5 font-medium; }
-  .typo-attachment-name { @apply text-sm/5 font-medium; }
-  .typo-post-metric     { @apply text-sm/5 font-medium; }
-  .typo-sidebar-item    { @apply text-sm/5 font-medium; }
-  .typo-sidebar-more    { @apply text-sm/5 font-medium; }
+  .typo-control-input {
+    @apply text-sm/5 font-medium;
+  }
+
+  .typo-control-filter {
+    @apply text-sm/5 font-medium;
+  }
+
+  .typo-control-action {
+    @apply text-sm/5 font-medium;
+  }
+
+  .typo-post-author {
+    @apply text-sm/5 font-medium;
+  }
+
+  .typo-post-tag {
+    @apply text-sm/5 font-medium;
+  }
+
+  .typo-attachment-name {
+    @apply text-sm/5 font-medium;
+  }
+
+  .typo-post-metric {
+    @apply text-sm/5 font-medium;
+  }
+
+  .typo-sidebar-item {
+    @apply text-sm/5 font-medium;
+  }
+
+  .typo-sidebar-more {
+    @apply text-sm/5 font-medium;
+  }
 
   /* 12/16 + normal */
-  .typo-meta-timestamp  { @apply text-xs/4 font-normal; }
-  .typo-meta-filesize   { @apply text-xs/4 font-normal; }
-  .typo-sidebar-footer  { @apply text-xs/4 font-normal; }
+  .typo-meta-timestamp {
+    @apply text-xs/4 font-normal;
+  }
+
+  .typo-meta-filesize {
+    @apply text-xs/4 font-normal;
+  }
+
+  .typo-sidebar-footer {
+    @apply text-xs/4 font-normal;
+  }
 }

@@ -1,18 +1,20 @@
 import axios from "axios";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
-import { userServiceRefreshToken } from "./generated";
+import { userServiceRefreshToken, type UserTokenPair } from "./generated";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL as string;
 
 export const token = {
   get: () => localStorage.getItem("access_token"),
-  set: (t: string) => localStorage.setItem("access_token", t),
+  set: (t: UserTokenPair) => {
+    localStorage.setItem("access_token", t.accessToken);
+    localStorage.setItem("refresh_token", t.refreshToken);
+  },
   getRefresh: () => localStorage.getItem("refresh_token"),
-  setRefresh: (t: string) => localStorage.setItem("refresh_token", t),
   clear: () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
-  }
+  },
 };
 
 export const api = axios.create({ baseURL });
@@ -30,7 +32,7 @@ createAuthRefreshInterceptor(
       const data = await userServiceRefreshToken({
         refreshToken: token.getRefresh() as string,
       });
-      token.set(data.tokens.accessToken);
+      token.set(data.tokens);
       failedRequest.response.config.headers.Authorization = `Bearer ${data.tokens.accessToken}`;
       return Promise.resolve();
     } catch (e) {
