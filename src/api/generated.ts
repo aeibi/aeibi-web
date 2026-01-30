@@ -9,9 +9,14 @@ import {
   useQuery
 } from '@tanstack/react-query';
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -254,6 +259,14 @@ export interface FileUploadFileResponse {
   readonly url: string;
 }
 
+export interface PostAttachment {
+  readonly url: string;
+  readonly name: string;
+  readonly size: string;
+  readonly contentType: string;
+  readonly checksum: string;
+}
+
 export interface PostCreatePostRequest {
   text?: string;
   images?: string[];
@@ -263,12 +276,22 @@ export interface PostCreatePostRequest {
   pinned?: boolean;
 }
 
+export interface PostCreatePostResponse {
+  readonly uid: string;
+}
+
+export interface PostPostAuthor {
+  readonly uid: string;
+  readonly nickname: string;
+  readonly avatarUrl: string;
+}
+
 export interface PostPost {
   readonly uid: string;
-  readonly author: string;
+  readonly author: PostPostAuthor;
   readonly text: string;
   readonly images: readonly string[];
-  readonly attachments: readonly string[];
+  readonly attachments: readonly PostAttachment[];
   readonly tags: readonly string[];
   readonly commentCount: string;
   readonly collectionCount: string;
@@ -281,10 +304,6 @@ export interface PostPost {
   readonly updatedAt: string;
 }
 
-export interface PostCreatePostResponse {
-  readonly post: PostPost;
-}
-
 export interface PostGetPostResponse {
   readonly post: PostPost;
 }
@@ -295,12 +314,8 @@ export interface PostListPostsResponse {
   readonly totalSize: string;
 }
 
-export interface PostPostCounterResponse {
-  readonly post: PostPost;
-}
-
 export interface PostUpdatePostResponse {
-  readonly post: PostPost;
+  readonly uid: string;
 }
 
 export interface RpcStatus {
@@ -419,6 +434,10 @@ search?: string;
 
 export type PostServiceDeletePost200 = { [key: string]: unknown };
 
+export type PostServiceCollectPost200 = { [key: string]: unknown };
+
+export type PostServiceLikePost200 = { [key: string]: unknown };
+
 export type UserServiceListUsersParams = {
 pageSize?: number;
 pageToken?: string;
@@ -487,13 +506,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useUserServiceLogin = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceLogin>>, TError,{data: UserLoginRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof userServiceLogin>>,
         TError,
         {data: UserLoginRequest},
         TContext
       > => {
-      return useMutation(getUserServiceLoginMutationOptions(options));
+      return useMutation(getUserServiceLoginMutationOptions(options), queryClient);
     }
     
 /**
@@ -551,13 +570,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useUserServiceRefreshToken = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceRefreshToken>>, TError,{data: UserRefreshTokenRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof userServiceRefreshToken>>,
         TError,
         {data: UserRefreshTokenRequest},
         TContext
       > => {
-      return useMutation(getUserServiceRefreshTokenMutationOptions(options));
+      return useMutation(getUserServiceRefreshTokenMutationOptions(options), queryClient);
     }
     
 /**
@@ -615,15 +634,106 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useFileServiceUploadFile = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof fileServiceUploadFile>>, TError,{data: FileUploadFileRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof fileServiceUploadFile>>,
         TError,
         {data: FileUploadFileRequest},
         TContext
       > => {
-      return useMutation(getFileServiceUploadFileMutationOptions(options));
+      return useMutation(getFileServiceUploadFileMutationOptions(options), queryClient);
     }
     
+/**
+ * @summary GET /api/v1/files/content/{url} 获取文件内容
+ */
+export const fileServiceGetFile = (
+    url: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<ApiHttpBody>(
+      {url: `/api/v1/files/content/${url}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getFileServiceGetFileQueryKey = (url: string,) => {
+    return [
+    `/api/v1/files/content/${url}`
+    ] as const;
+    }
+
+    
+export const getFileServiceGetFileQueryOptions = <TData = Awaited<ReturnType<typeof fileServiceGetFile>>, TError = ErrorType<RpcStatus>>(url: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFile>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getFileServiceGetFileQueryKey(url);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof fileServiceGetFile>>> = ({ signal }) => fileServiceGetFile(url, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(url), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFile>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type FileServiceGetFileQueryResult = NonNullable<Awaited<ReturnType<typeof fileServiceGetFile>>>
+export type FileServiceGetFileQueryError = ErrorType<RpcStatus>
+
+
+export function useFileServiceGetFile<TData = Awaited<ReturnType<typeof fileServiceGetFile>>, TError = ErrorType<RpcStatus>>(
+ url: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFile>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fileServiceGetFile>>,
+          TError,
+          Awaited<ReturnType<typeof fileServiceGetFile>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFileServiceGetFile<TData = Awaited<ReturnType<typeof fileServiceGetFile>>, TError = ErrorType<RpcStatus>>(
+ url: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFile>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fileServiceGetFile>>,
+          TError,
+          Awaited<ReturnType<typeof fileServiceGetFile>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFileServiceGetFile<TData = Awaited<ReturnType<typeof fileServiceGetFile>>, TError = ErrorType<RpcStatus>>(
+ url: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFile>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary GET /api/v1/files/content/{url} 获取文件内容
+ */
+
+export function useFileServiceGetFile<TData = Awaited<ReturnType<typeof fileServiceGetFile>>, TError = ErrorType<RpcStatus>>(
+ url: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFile>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getFileServiceGetFileQueryOptions(url,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
 /**
  * @summary GET /api/v1/files/meta/{url} 获取文件元数据（不含内容）
  */
@@ -649,7 +759,7 @@ export const getFileServiceGetFileMetaQueryKey = (url: string,) => {
     }
 
     
-export const getFileServiceGetFileMetaQueryOptions = <TData = Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError = ErrorType<RpcStatus>>(url: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getFileServiceGetFileMetaQueryOptions = <TData = Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError = ErrorType<RpcStatus>>(url: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -664,92 +774,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
       
 
-   return  { queryKey, queryFn, enabled: !!(url), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(url), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type FileServiceGetFileMetaQueryResult = NonNullable<Awaited<ReturnType<typeof fileServiceGetFileMeta>>>
 export type FileServiceGetFileMetaQueryError = ErrorType<RpcStatus>
 
 
+export function useFileServiceGetFileMeta<TData = Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError = ErrorType<RpcStatus>>(
+ url: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fileServiceGetFileMeta>>,
+          TError,
+          Awaited<ReturnType<typeof fileServiceGetFileMeta>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFileServiceGetFileMeta<TData = Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError = ErrorType<RpcStatus>>(
+ url: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fileServiceGetFileMeta>>,
+          TError,
+          Awaited<ReturnType<typeof fileServiceGetFileMeta>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFileServiceGetFileMeta<TData = Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError = ErrorType<RpcStatus>>(
+ url: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary GET /api/v1/files/meta/{url} 获取文件元数据（不含内容）
  */
 
 export function useFileServiceGetFileMeta<TData = Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError = ErrorType<RpcStatus>>(
- url: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ url: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFileMeta>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getFileServiceGetFileMetaQueryOptions(url,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-/**
- * @summary GET /api/v1/files/{url} 获取文件内容
- */
-export const fileServiceGetFile = (
-    url: string,
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
-) => {
-      
-      
-      return customInstance<ApiHttpBody>(
-      {url: `/api/v1/files/${url}`, method: 'GET', signal
-    },
-      options);
-    }
-  
-
-
-
-export const getFileServiceGetFileQueryKey = (url: string,) => {
-    return [
-    `/api/v1/files/${url}`
-    ] as const;
-    }
-
-    
-export const getFileServiceGetFileQueryOptions = <TData = Awaited<ReturnType<typeof fileServiceGetFile>>, TError = ErrorType<RpcStatus>>(url: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFile>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getFileServiceGetFileQueryKey(url);
-
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof fileServiceGetFile>>> = ({ signal }) => fileServiceGetFile(url, requestOptions, signal);
-
-      
-
-      
-
-   return  { queryKey, queryFn, enabled: !!(url), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFile>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type FileServiceGetFileQueryResult = NonNullable<Awaited<ReturnType<typeof fileServiceGetFile>>>
-export type FileServiceGetFileQueryError = ErrorType<RpcStatus>
-
-
-/**
- * @summary GET /api/v1/files/{url} 获取文件内容
- */
-
-export function useFileServiceGetFile<TData = Awaited<ReturnType<typeof fileServiceGetFile>>, TError = ErrorType<RpcStatus>>(
- url: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof fileServiceGetFile>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getFileServiceGetFileQueryOptions(url,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -783,7 +850,7 @@ export const getUserServiceGetMeQueryKey = () => {
     }
 
     
-export const getUserServiceGetMeQueryOptions = <TData = Awaited<ReturnType<typeof userServiceGetMe>>, TError = ErrorType<RpcStatus>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof userServiceGetMe>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getUserServiceGetMeQueryOptions = <TData = Awaited<ReturnType<typeof userServiceGetMe>>, TError = ErrorType<RpcStatus>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceGetMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -798,25 +865,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof userServiceGetMe>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof userServiceGetMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type UserServiceGetMeQueryResult = NonNullable<Awaited<ReturnType<typeof userServiceGetMe>>>
 export type UserServiceGetMeQueryError = ErrorType<RpcStatus>
 
 
+export function useUserServiceGetMe<TData = Awaited<ReturnType<typeof userServiceGetMe>>, TError = ErrorType<RpcStatus>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceGetMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof userServiceGetMe>>,
+          TError,
+          Awaited<ReturnType<typeof userServiceGetMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUserServiceGetMe<TData = Awaited<ReturnType<typeof userServiceGetMe>>, TError = ErrorType<RpcStatus>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceGetMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof userServiceGetMe>>,
+          TError,
+          Awaited<ReturnType<typeof userServiceGetMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUserServiceGetMe<TData = Awaited<ReturnType<typeof userServiceGetMe>>, TError = ErrorType<RpcStatus>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceGetMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary GET /api/v1/me 当前用户
  */
 
 export function useUserServiceGetMe<TData = Awaited<ReturnType<typeof userServiceGetMe>>, TError = ErrorType<RpcStatus>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof userServiceGetMe>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceGetMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getUserServiceGetMeQueryOptions(options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -880,13 +971,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useUserServiceUpdateMe = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceUpdateMe>>, TError,{data: UserUpdateMeRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof userServiceUpdateMe>>,
         TError,
         {data: UserUpdateMeRequest},
         TContext
       > => {
-      return useMutation(getUserServiceUpdateMeMutationOptions(options));
+      return useMutation(getUserServiceUpdateMeMutationOptions(options), queryClient);
     }
     
 /**
@@ -915,7 +1006,7 @@ export const getPostServiceListMyCollectionsQueryKey = (params?: PostServiceList
     }
 
     
-export const getPostServiceListMyCollectionsQueryOptions = <TData = Awaited<ReturnType<typeof postServiceListMyCollections>>, TError = ErrorType<RpcStatus>>(params?: PostServiceListMyCollectionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyCollections>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getPostServiceListMyCollectionsQueryOptions = <TData = Awaited<ReturnType<typeof postServiceListMyCollections>>, TError = ErrorType<RpcStatus>>(params?: PostServiceListMyCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyCollections>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -930,25 +1021,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyCollections>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyCollections>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type PostServiceListMyCollectionsQueryResult = NonNullable<Awaited<ReturnType<typeof postServiceListMyCollections>>>
 export type PostServiceListMyCollectionsQueryError = ErrorType<RpcStatus>
 
 
+export function usePostServiceListMyCollections<TData = Awaited<ReturnType<typeof postServiceListMyCollections>>, TError = ErrorType<RpcStatus>>(
+ params: undefined |  PostServiceListMyCollectionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyCollections>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceListMyCollections>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceListMyCollections>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceListMyCollections<TData = Awaited<ReturnType<typeof postServiceListMyCollections>>, TError = ErrorType<RpcStatus>>(
+ params?: PostServiceListMyCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyCollections>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceListMyCollections>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceListMyCollections>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceListMyCollections<TData = Awaited<ReturnType<typeof postServiceListMyCollections>>, TError = ErrorType<RpcStatus>>(
+ params?: PostServiceListMyCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyCollections>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary GET /api/v1/me/collections 当前用户收藏的帖子列表
  */
 
 export function usePostServiceListMyCollections<TData = Awaited<ReturnType<typeof postServiceListMyCollections>>, TError = ErrorType<RpcStatus>>(
- params?: PostServiceListMyCollectionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyCollections>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ params?: PostServiceListMyCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyCollections>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getPostServiceListMyCollectionsQueryOptions(params,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -1012,13 +1127,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useUserServiceChangePassword = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceChangePassword>>, TError,{data: UserChangePasswordRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof userServiceChangePassword>>,
         TError,
         {data: UserChangePasswordRequest},
         TContext
       > => {
-      return useMutation(getUserServiceChangePasswordMutationOptions(options));
+      return useMutation(getUserServiceChangePasswordMutationOptions(options), queryClient);
     }
     
 /**
@@ -1047,7 +1162,7 @@ export const getPostServiceListMyPostsQueryKey = (params?: PostServiceListMyPost
     }
 
     
-export const getPostServiceListMyPostsQueryOptions = <TData = Awaited<ReturnType<typeof postServiceListMyPosts>>, TError = ErrorType<RpcStatus>>(params?: PostServiceListMyPostsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyPosts>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getPostServiceListMyPostsQueryOptions = <TData = Awaited<ReturnType<typeof postServiceListMyPosts>>, TError = ErrorType<RpcStatus>>(params?: PostServiceListMyPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyPosts>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1062,25 +1177,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyPosts>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyPosts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type PostServiceListMyPostsQueryResult = NonNullable<Awaited<ReturnType<typeof postServiceListMyPosts>>>
 export type PostServiceListMyPostsQueryError = ErrorType<RpcStatus>
 
 
+export function usePostServiceListMyPosts<TData = Awaited<ReturnType<typeof postServiceListMyPosts>>, TError = ErrorType<RpcStatus>>(
+ params: undefined |  PostServiceListMyPostsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyPosts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceListMyPosts>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceListMyPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceListMyPosts<TData = Awaited<ReturnType<typeof postServiceListMyPosts>>, TError = ErrorType<RpcStatus>>(
+ params?: PostServiceListMyPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyPosts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceListMyPosts>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceListMyPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceListMyPosts<TData = Awaited<ReturnType<typeof postServiceListMyPosts>>, TError = ErrorType<RpcStatus>>(
+ params?: PostServiceListMyPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyPosts>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary GET /api/v1/me/posts 当前用户发布的列表（含 PRIVATE）
  */
 
 export function usePostServiceListMyPosts<TData = Awaited<ReturnType<typeof postServiceListMyPosts>>, TError = ErrorType<RpcStatus>>(
- params?: PostServiceListMyPostsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyPosts>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ params?: PostServiceListMyPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListMyPosts>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getPostServiceListMyPostsQueryOptions(params,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -1114,7 +1253,7 @@ export const getPostServiceGetMyPostQueryKey = (uid: string,) => {
     }
 
     
-export const getPostServiceGetMyPostQueryOptions = <TData = Awaited<ReturnType<typeof postServiceGetMyPost>>, TError = ErrorType<RpcStatus>>(uid: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof postServiceGetMyPost>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getPostServiceGetMyPostQueryOptions = <TData = Awaited<ReturnType<typeof postServiceGetMyPost>>, TError = ErrorType<RpcStatus>>(uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceGetMyPost>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1129,25 +1268,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
       
 
-   return  { queryKey, queryFn, enabled: !!(uid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postServiceGetMyPost>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(uid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postServiceGetMyPost>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type PostServiceGetMyPostQueryResult = NonNullable<Awaited<ReturnType<typeof postServiceGetMyPost>>>
 export type PostServiceGetMyPostQueryError = ErrorType<RpcStatus>
 
 
+export function usePostServiceGetMyPost<TData = Awaited<ReturnType<typeof postServiceGetMyPost>>, TError = ErrorType<RpcStatus>>(
+ uid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceGetMyPost>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceGetMyPost>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceGetMyPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceGetMyPost<TData = Awaited<ReturnType<typeof postServiceGetMyPost>>, TError = ErrorType<RpcStatus>>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceGetMyPost>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceGetMyPost>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceGetMyPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceGetMyPost<TData = Awaited<ReturnType<typeof postServiceGetMyPost>>, TError = ErrorType<RpcStatus>>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceGetMyPost>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary GET /api/v1/me/posts/{uid} 当前用户的帖子详情（含 PRIVATE）
  */
 
 export function usePostServiceGetMyPost<TData = Awaited<ReturnType<typeof postServiceGetMyPost>>, TError = ErrorType<RpcStatus>>(
- uid: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof postServiceGetMyPost>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceGetMyPost>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getPostServiceGetMyPostQueryOptions(uid,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -1182,7 +1345,7 @@ export const getPostServiceListPostsQueryKey = (params?: PostServiceListPostsPar
     }
 
     
-export const getPostServiceListPostsQueryOptions = <TData = Awaited<ReturnType<typeof postServiceListPosts>>, TError = ErrorType<RpcStatus>>(params?: PostServiceListPostsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof postServiceListPosts>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getPostServiceListPostsQueryOptions = <TData = Awaited<ReturnType<typeof postServiceListPosts>>, TError = ErrorType<RpcStatus>>(params?: PostServiceListPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListPosts>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1197,25 +1360,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postServiceListPosts>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postServiceListPosts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type PostServiceListPostsQueryResult = NonNullable<Awaited<ReturnType<typeof postServiceListPosts>>>
 export type PostServiceListPostsQueryError = ErrorType<RpcStatus>
 
 
+export function usePostServiceListPosts<TData = Awaited<ReturnType<typeof postServiceListPosts>>, TError = ErrorType<RpcStatus>>(
+ params: undefined |  PostServiceListPostsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListPosts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceListPosts>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceListPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceListPosts<TData = Awaited<ReturnType<typeof postServiceListPosts>>, TError = ErrorType<RpcStatus>>(
+ params?: PostServiceListPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListPosts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceListPosts>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceListPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceListPosts<TData = Awaited<ReturnType<typeof postServiceListPosts>>, TError = ErrorType<RpcStatus>>(
+ params?: PostServiceListPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListPosts>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary GET /api/v1/posts 列表（公开）
  */
 
 export function usePostServiceListPosts<TData = Awaited<ReturnType<typeof postServiceListPosts>>, TError = ErrorType<RpcStatus>>(
- params?: PostServiceListPostsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof postServiceListPosts>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ params?: PostServiceListPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListPosts>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getPostServiceListPostsQueryOptions(params,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -1279,13 +1466,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostServiceCreatePost = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postServiceCreatePost>>, TError,{data: PostCreatePostRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postServiceCreatePost>>,
         TError,
         {data: PostCreatePostRequest},
         TContext
       > => {
-      return useMutation(getPostServiceCreatePostMutationOptions(options));
+      return useMutation(getPostServiceCreatePostMutationOptions(options), queryClient);
     }
     
 /**
@@ -1313,7 +1500,7 @@ export const getPostServiceGetPostQueryKey = (uid: string,) => {
     }
 
     
-export const getPostServiceGetPostQueryOptions = <TData = Awaited<ReturnType<typeof postServiceGetPost>>, TError = ErrorType<RpcStatus>>(uid: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof postServiceGetPost>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getPostServiceGetPostQueryOptions = <TData = Awaited<ReturnType<typeof postServiceGetPost>>, TError = ErrorType<RpcStatus>>(uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceGetPost>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1328,25 +1515,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
       
 
-   return  { queryKey, queryFn, enabled: !!(uid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postServiceGetPost>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(uid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postServiceGetPost>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type PostServiceGetPostQueryResult = NonNullable<Awaited<ReturnType<typeof postServiceGetPost>>>
 export type PostServiceGetPostQueryError = ErrorType<RpcStatus>
 
 
+export function usePostServiceGetPost<TData = Awaited<ReturnType<typeof postServiceGetPost>>, TError = ErrorType<RpcStatus>>(
+ uid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceGetPost>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceGetPost>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceGetPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceGetPost<TData = Awaited<ReturnType<typeof postServiceGetPost>>, TError = ErrorType<RpcStatus>>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceGetPost>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceGetPost>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceGetPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceGetPost<TData = Awaited<ReturnType<typeof postServiceGetPost>>, TError = ErrorType<RpcStatus>>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceGetPost>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary GET /api/v1/posts/{uid} 详情
  */
 
 export function usePostServiceGetPost<TData = Awaited<ReturnType<typeof postServiceGetPost>>, TError = ErrorType<RpcStatus>>(
- uid: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof postServiceGetPost>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceGetPost>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getPostServiceGetPostQueryOptions(uid,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -1408,13 +1619,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostServiceDeletePost = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postServiceDeletePost>>, TError,{uid: string}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postServiceDeletePost>>,
         TError,
         {uid: string},
         TContext
       > => {
-      return useMutation(getPostServiceDeletePostMutationOptions(options));
+      return useMutation(getPostServiceDeletePostMutationOptions(options), queryClient);
     }
     
 /**
@@ -1473,13 +1684,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostServiceUpdatePost = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postServiceUpdatePost>>, TError,{uid: string;data: PostServiceUpdatePostBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postServiceUpdatePost>>,
         TError,
         {uid: string;data: PostServiceUpdatePostBody},
         TContext
       > => {
-      return useMutation(getPostServiceUpdatePostMutationOptions(options));
+      return useMutation(getPostServiceUpdatePostMutationOptions(options), queryClient);
     }
     
 /**
@@ -1492,7 +1703,7 @@ export const postServiceCollectPost = (
 ) => {
       
       
-      return customInstance<PostPostCounterResponse>(
+      return customInstance<PostServiceCollectPost200>(
       {url: `/api/v1/posts/${uid}/collect`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: postServiceCollectPostBody, signal
@@ -1538,13 +1749,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostServiceCollectPost = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postServiceCollectPost>>, TError,{uid: string;data: PostServiceCollectPostBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postServiceCollectPost>>,
         TError,
         {uid: string;data: PostServiceCollectPostBody},
         TContext
       > => {
-      return useMutation(getPostServiceCollectPostMutationOptions(options));
+      return useMutation(getPostServiceCollectPostMutationOptions(options), queryClient);
     }
     
 /**
@@ -1557,7 +1768,7 @@ export const postServiceLikePost = (
 ) => {
       
       
-      return customInstance<PostPostCounterResponse>(
+      return customInstance<PostServiceLikePost200>(
       {url: `/api/v1/posts/${uid}/like`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: postServiceLikePostBody, signal
@@ -1603,13 +1814,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostServiceLikePost = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postServiceLikePost>>, TError,{uid: string;data: PostServiceLikePostBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postServiceLikePost>>,
         TError,
         {uid: string;data: PostServiceLikePostBody},
         TContext
       > => {
-      return useMutation(getPostServiceLikePostMutationOptions(options));
+      return useMutation(getPostServiceLikePostMutationOptions(options), queryClient);
     }
     
 /**
@@ -1638,7 +1849,7 @@ export const getUserServiceListUsersQueryKey = (params?: UserServiceListUsersPar
     }
 
     
-export const getUserServiceListUsersQueryOptions = <TData = Awaited<ReturnType<typeof userServiceListUsers>>, TError = ErrorType<RpcStatus>>(params?: UserServiceListUsersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getUserServiceListUsersQueryOptions = <TData = Awaited<ReturnType<typeof userServiceListUsers>>, TError = ErrorType<RpcStatus>>(params?: UserServiceListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1653,25 +1864,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type UserServiceListUsersQueryResult = NonNullable<Awaited<ReturnType<typeof userServiceListUsers>>>
 export type UserServiceListUsersQueryError = ErrorType<RpcStatus>
 
 
+export function useUserServiceListUsers<TData = Awaited<ReturnType<typeof userServiceListUsers>>, TError = ErrorType<RpcStatus>>(
+ params: undefined |  UserServiceListUsersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof userServiceListUsers>>,
+          TError,
+          Awaited<ReturnType<typeof userServiceListUsers>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUserServiceListUsers<TData = Awaited<ReturnType<typeof userServiceListUsers>>, TError = ErrorType<RpcStatus>>(
+ params?: UserServiceListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof userServiceListUsers>>,
+          TError,
+          Awaited<ReturnType<typeof userServiceListUsers>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUserServiceListUsers<TData = Awaited<ReturnType<typeof userServiceListUsers>>, TError = ErrorType<RpcStatus>>(
+ params?: UserServiceListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary GET /api/v1/users 列表
  */
 
 export function useUserServiceListUsers<TData = Awaited<ReturnType<typeof userServiceListUsers>>, TError = ErrorType<RpcStatus>>(
- params?: UserServiceListUsersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ params?: UserServiceListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getUserServiceListUsersQueryOptions(params,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -1735,13 +1970,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useUserServiceCreateUser = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceCreateUser>>, TError,{data: UserCreateUserRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof userServiceCreateUser>>,
         TError,
         {data: UserCreateUserRequest},
         TContext
       > => {
-      return useMutation(getUserServiceCreateUserMutationOptions(options));
+      return useMutation(getUserServiceCreateUserMutationOptions(options), queryClient);
     }
     
 /**
@@ -1769,7 +2004,7 @@ export const getUserServiceGetUserQueryKey = (uid: string,) => {
     }
 
     
-export const getUserServiceGetUserQueryOptions = <TData = Awaited<ReturnType<typeof userServiceGetUser>>, TError = ErrorType<RpcStatus>>(uid: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof userServiceGetUser>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getUserServiceGetUserQueryOptions = <TData = Awaited<ReturnType<typeof userServiceGetUser>>, TError = ErrorType<RpcStatus>>(uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceGetUser>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1784,25 +2019,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
       
 
-   return  { queryKey, queryFn, enabled: !!(uid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof userServiceGetUser>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(uid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof userServiceGetUser>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type UserServiceGetUserQueryResult = NonNullable<Awaited<ReturnType<typeof userServiceGetUser>>>
 export type UserServiceGetUserQueryError = ErrorType<RpcStatus>
 
 
+export function useUserServiceGetUser<TData = Awaited<ReturnType<typeof userServiceGetUser>>, TError = ErrorType<RpcStatus>>(
+ uid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceGetUser>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof userServiceGetUser>>,
+          TError,
+          Awaited<ReturnType<typeof userServiceGetUser>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUserServiceGetUser<TData = Awaited<ReturnType<typeof userServiceGetUser>>, TError = ErrorType<RpcStatus>>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceGetUser>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof userServiceGetUser>>,
+          TError,
+          Awaited<ReturnType<typeof userServiceGetUser>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUserServiceGetUser<TData = Awaited<ReturnType<typeof userServiceGetUser>>, TError = ErrorType<RpcStatus>>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceGetUser>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary GET /api/v1/users/{uid} 详情
  */
 
 export function useUserServiceGetUser<TData = Awaited<ReturnType<typeof userServiceGetUser>>, TError = ErrorType<RpcStatus>>(
- uid: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof userServiceGetUser>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceGetUser>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getUserServiceGetUserQueryOptions(uid,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -1864,13 +2123,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useUserServiceDeleteUser = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceDeleteUser>>, TError,{uid: string}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof userServiceDeleteUser>>,
         TError,
         {uid: string},
         TContext
       > => {
-      return useMutation(getUserServiceDeleteUserMutationOptions(options));
+      return useMutation(getUserServiceDeleteUserMutationOptions(options), queryClient);
     }
     
 /**
@@ -1929,11 +2188,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useUserServiceUpdateUser = <TError = ErrorType<RpcStatus>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceUpdateUser>>, TError,{uid: string;data: UserServiceUpdateUserBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof userServiceUpdateUser>>,
         TError,
         {uid: string;data: UserServiceUpdateUserBody},
         TContext
       > => {
-      return useMutation(getUserServiceUpdateUserMutationOptions(options));
+      return useMutation(getUserServiceUpdateUserMutationOptions(options), queryClient);
     }

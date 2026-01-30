@@ -1,5 +1,5 @@
 import { SidebarFooter } from "@/components/SidebarFooter";
-import { PostCard, type PostData } from "@/components/PostCard";
+import { PostCard } from "@/components/PostCard";
 import {
   TrendingTopicsCard,
   type TrendingTopic,
@@ -10,63 +10,16 @@ import {
 } from "@/components/PostComposer";
 import { SearchBar } from "@/components/SearchBar";
 import { FeedSortButtons } from "@/components/FeedSortButtons";
-import { getFileUrl } from "@/lib/file";
-import { usePostServiceCreatePost, useUserServiceGetMe } from "@/api/generated";
-
-const mockPosts: PostData[] = [
-  {
-    id: "post-1",
-    author: "自由树",
-    avatar: "https://api.dicebear.com/9.x/thumbs/svg?seed=tree",
-    time: "12分钟前",
-    text: "不需要通关才能享受生活嘞",
-    tags: ["生活碎片"],
-    images: [
-      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80",
-    ],
-    likes: 3,
-    comments: 3,
-    bookmarked: 0,
-  },
-  {
-    id: "post-2",
-    author: "余小圆",
-    avatar: "https://api.dicebear.com/9.x/thumbs/svg?seed=circle",
-    time: "昨天",
-    text: "整理了一些传感器复习资料，有需要的自取👇",
-    tags: ["学习资料", "期末考试"],
-    attachments: [
-      {
-        name: "传感器原理期末重点.pdf",
-        size: "4.2 MB",
-      },
-      {
-        name: "历年真题及答案.zip",
-        size: "12.8 MB",
-      },
-    ],
-    likes: 19,
-    comments: 5,
-    bookmarked: 0,
-  },
-  {
-    id: "post-3",
-    author: "低语者",
-    avatar: "https://api.dicebear.com/9.x/thumbs/svg?seed=quiet",
-    time: "1天前",
-    text: "夜跑路上偶遇校猫，分享好运气 🐾",
-    tags: ["校园碎片"],
-    images: [
-      "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=900&q=80",
-    ],
-    likes: 11,
-    comments: 2,
-    bookmarked: 1,
-  },
-];
+import { useState } from "react";
+import {
+  usePostServiceCreatePost,
+  usePostServiceListPosts,
+  useUserServiceGetMe,
+  useFileServiceUploadFile,
+} from "@/api/generated";
+import { formatFeedTime } from "@/lib/time";
+import { fileSha256, fileToBase64, formatFileSize } from "@/lib/file";
+import { useNavigate } from "react-router-dom";
 
 const trendingTopics: TrendingTopic[] = [
   { title: "期末考试", count: 220 },
@@ -80,22 +33,73 @@ const trendingTopics: TrendingTopic[] = [
 ];
 
 export function HomePage() {
-  const { data: me, isSuccess } = useUserServiceGetMe();
-  const { mutate: createPost } = usePostServiceCreatePost();
+  const navigate = useNavigate();
+
+  const { data: me, isSuccess: isMeSuccess } = useUserServiceGetMe();
+  const { data: posts, isSuccess: isPostsSuccess } = usePostServiceListPosts();
+  const [composerContent, setComposerContent] = useState<PostComposerContent>({
+    text: "",
+    visibility: "PUBLIC",
+  });
+  const { mutateAsync: uploadAttachment } = useFileServiceUploadFile({
+    mutation: {
+      onSuccess: (data) =>
+        setComposerContent({
+          ...composerContent,
+          attachments: (composerContent.attachments ?? []).concat({
+            url: data.url,
+            name: data.file.name,
+            size: formatFileSize(data.file.size),
+          }),
+        }),
+    },
+  });
+  const { mutateAsync: uploadImage } = useFileServiceUploadFile({
+    mutation: {
+      onSuccess: (data) =>
+        setComposerContent({
+          ...composerContent,
+          images: (composerContent.images ?? []).concat(data.url),
+        }),
+    },
+  });
+  const { mutate: createPost } = usePostServiceCreatePost({
+    mutation: {
+      onSuccess: () => {
+        setComposerContent({ text: "", visibility: "PUBLIC" });
+        navigate(0);
+      },
+    },
+  });
 
   const handleCreatePost = (content: PostComposerContent) => {
     createPost({
       data: {
-        text: content.text,
-        tags: content.tags,
-        images: content.images,
-        attachments: content.attachments,
-        visibility: "PUBLIC",
+        ...content,
+        attachments: content.attachments?.map((att) => att.url) || [],
       },
     });
   };
 
-  const handleSaveDraft = (content: PostComposerContent) => {};
+  const onUploadImage = async (files: File[]) => {
+    for (const file of files) {
+      const data = await fileToBase64(file);
+      const checksum = crypto?.subtle ? await fileSha256(file) : undefined;
+      await uploadImage({
+        data: { name: file.name, contentType: file.type, data, checksum },
+      });
+    }
+  };
+
+  const onUploadAttachment = async (files: File[]) => {
+    for (const file of files) {
+      const data = await fileToBase64(file);
+      const checksum = crypto?.subtle ? await fileSha256(file) : undefined;
+      await uploadAttachment({
+        data: { name: file.name, contentType: file.type, data, checksum },
+      });
+    }
+  };
 
   return (
     <div className="flex gap-8">
@@ -106,16 +110,29 @@ export function HomePage() {
           </div>
           <FeedSortButtons />
         </div>
-        {isSuccess && (
+        {isMeSuccess && (
           <PostComposer
-            avatar={getFileUrl(me.user.avatarUrl)}
+            avatar={me.user.avatarUrl}
+            content={composerContent}
+            setContent={setComposerContent}
             onPublish={handleCreatePost}
-            onSaveDraft={handleSaveDraft}
+            onUploadImage={onUploadImage}
+            onUploadAttachment={onUploadAttachment}
           />
         )}
-        {mockPosts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
+        {isPostsSuccess &&
+          posts.posts.map((post) => (
+            <PostCard
+              key={post.uid}
+              post={{
+                ...post,
+                time: formatFeedTime(new Date(1000 * Number(post.updatedAt))),
+                images: Array.from(post.images ?? []),
+                tags: Array.from(post.tags ?? []),
+                attachments: Array.from(post.attachments ?? []),
+              }}
+            />
+          ))}
       </div>
       <div className="w-64 shrink-0 sticky top-0 self-start">
         <TrendingTopicsCard topics={trendingTopics} />

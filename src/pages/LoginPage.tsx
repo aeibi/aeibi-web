@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import icon from "@/assets/icon.svg";
 import { useUserServiceLogin, type UserLoginRequest } from "@/api/generated";
 import { token } from "@/api/client";
 
 export function LoginPage() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState<UserLoginRequest>({
     account: "",
     password: "",
@@ -14,7 +16,7 @@ export function LoginPage() {
     mutation: {
       onSuccess: (result) => {
         token.set(result.tokens);
-        window.location.href = "/";
+        navigate("/");
       },
     },
   });

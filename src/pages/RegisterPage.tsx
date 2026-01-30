@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import icon from "@/assets/icon.svg";
 import {
   useUserServiceCreateUser,
@@ -7,6 +7,8 @@ import {
 } from "@/api/generated";
 
 export function RegisterPage() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState<UserCreateUserRequest>({
     username: "",
     password: "",
@@ -15,7 +17,7 @@ export function RegisterPage() {
   const { mutate, isPending, isError } = useUserServiceCreateUser({
     mutation: {
       onSuccess: () => {
-        window.location.href = `/login`;
+        navigate("/login");
       },
     },
   });

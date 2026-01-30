@@ -6,9 +6,11 @@ import {
   type UserUpdateMeRequest,
 } from "@/api/generated";
 import { fileSha256, fileToBase64, getFileUrl } from "@/lib/file";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function ProfilePage() {
+  const navigate = useNavigate();
   const [error, setError] = useState<string>("");
   const [form, setForm] = useState<UserUpdateMeRequest>({});
   const { data: me, isSuccess, isLoading, isError } = useUserServiceGetMe();
@@ -43,7 +45,7 @@ export function ProfilePage() {
       uploadAvatar({
         data: { name: file.name, contentType: file.type, data, checksum },
       });
-    } catch (e) {
+    } catch {
       setError("上传头像失败");
     }
   };
@@ -53,10 +55,12 @@ export function ProfilePage() {
     mutate({ data: form });
   };
 
-  if (isError) {
-    token.clear();
-    window.location.href = "/";
-  }
+  useEffect(() => {
+    if (isError) {
+      token.clear();
+      navigate("/", { replace: true });
+    }
+  }, [isError, navigate]);
 
   if (isLoading || !isSuccess) return <></>;
 

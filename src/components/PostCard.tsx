@@ -1,5 +1,4 @@
 import {
-  Bookmark,
   Download,
   FileText,
   Heart,
@@ -8,37 +7,64 @@ import {
   Share2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatFileSize, getFileUrl } from "@/lib/file";
+
+export type PostAuthor = {
+  uid: string;
+  nickname: string;
+  avatarUrl: string;
+};
 
 export type PostAttachment = {
+  url: string;
   name: string;
   size: string;
 };
 
-export type PostData = {
-  id: string;
-  author: string;
-  avatar: string;
+export type Post = {
+  uid: string;
+  author: PostAuthor;
   time: string;
   text: string;
+  images: string[];
+  attachments: PostAttachment[];
   tags: string[];
-  images?: string[];
-  attachments?: PostAttachment[];
-  likes: number;
-  comments: number;
-  bookmarked: number;
+  commentCount: string;
+  collectionCount: string;
+  likeCount: string;
+  visibility: string;
+  latestRepliedOn: string;
+  ip: string;
+  pinned: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type PostCardProps = {
-  post: PostData;
+  post: Post;
 };
 
 export function PostCard({ post }: PostCardProps) {
+  const handleDownloadAttachment = (attachment: PostAttachment) => {
+    const url = getFileUrl(attachment.url);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = attachment.name || "";
+    link.rel = "noopener";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
   return (
     <article className="p-4 space-y-4 bg-surface rounded-lg">
       <header className="flex gap-2 items-center w-full">
-        <img src={post.avatar} className="h-10 w-10 rounded-full" />
+        <img
+          src={getFileUrl(post.author.avatarUrl)}
+          className="h-10 w-10 rounded-full"
+        />
         <div>
-          <div className="typo-post-author">{post.author}</div>
+          <div className="typo-post-author">{post.author.nickname}</div>
           <button className="typo-meta-timestamp text-muted transition-colors hover:text-primary cursor-pointer">
             {post.time}
           </button>
@@ -52,7 +78,7 @@ export function PostCard({ post }: PostCardProps) {
         <div className="flex gap-2">
           {post.tags.map((tag) => (
             <button
-              key={`${post.id}-tag-${tag}`}
+              key={`${post.uid}-tag-${tag}`}
               className="typo-post-tag text-primary cursor-pointer transition-colors hover:text-primary/80"
             >
               # {tag}
@@ -68,10 +94,13 @@ export function PostCard({ post }: PostCardProps) {
           >
             {post.images.slice(0, 4).map((src, index) => (
               <div
-                key={`${post.id}-image-${index}`}
+                key={`${post.uid}-image-${index}`}
                 className="aspect-18/10 overflow-hidden rounded-lg"
               >
-                <img src={src} className="w-full h-full object-cover" />
+                <img
+                  src={getFileUrl(src)}
+                  className="w-full h-full object-cover"
+                />
               </div>
             ))}
           </div>
@@ -79,9 +108,9 @@ export function PostCard({ post }: PostCardProps) {
 
         {post.attachments && post.attachments.length > 0 && (
           <div className="space-y-2">
-            {post.attachments.map((attachment) => (
+            {post.attachments.slice(0, 4).map((attachment) => (
               <div
-                key={`${post.id}-attachment-${attachment.name}`}
+                key={`${post.uid}-attachment-${attachment.url}`}
                 className="flex items-center gap-4 p-2 bg-surface-subtle rounded-lg"
               >
                 <div className="p-2 bg-surface rounded-lg">
@@ -90,10 +119,14 @@ export function PostCard({ post }: PostCardProps) {
                 <div>
                   <div className="typo-attachment-name">{attachment.name}</div>
                   <div className="typo-meta-filesize text-muted">
-                    {attachment.size}
+                    {formatFileSize(attachment.size)}
                   </div>
                 </div>
-                <button className="ml-auto p-2 text-muted transition-colors hover:text-primary cursor-pointer">
+                <button
+                  type="button"
+                  className="ml-auto p-2 text-muted transition-colors hover:text-primary cursor-pointer"
+                  onClick={() => handleDownloadAttachment(attachment)}
+                >
                   <Download className="h-4 w-4 text-current" />
                 </button>
               </div>
@@ -104,18 +137,18 @@ export function PostCard({ post }: PostCardProps) {
         <footer className="flex items-center gap-4 text-muted">
           <button className="flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
             <Heart className="h-4 w-4" />
-            <div className="typo-post-metric">{post.likes}</div>
+            <div className="typo-post-metric">{post.likeCount}</div>
           </button>
 
           <button className="flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
             <MessageCircleMore className="h-4 w-4" />
-            <div className="typo-post-metric">{post.comments}</div>
+            <div className="typo-post-metric">{post.commentCount}</div>
           </button>
 
-          <button className="flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
+          {/* <button className="flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
             <Bookmark className="h-4 w-4" />
             <div className="typo-post-metric">{post.bookmarked}</div>
-          </button>
+          </button> */}
 
           <button className="ml-auto flex items-center gap-1 transition-colors hover:text-primary cursor-pointer">
             <Share2 className="h-4 w-4" />
