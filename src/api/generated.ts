@@ -314,10 +314,6 @@ export interface PostListPostsResponse {
   readonly totalSize: string;
 }
 
-export interface PostUpdatePostResponse {
-  readonly uid: string;
-}
-
 export interface RpcStatus {
   code?: number;
   message?: string;
@@ -343,10 +339,6 @@ export interface UserUser {
   readonly email: string;
   readonly nickname: string;
   readonly avatarUrl: string;
-}
-
-export interface UserCreateUserResponse {
-  readonly user: UserUser;
 }
 
 export interface UserGetMeResponse {
@@ -377,7 +369,6 @@ export interface UserTokenPair {
 
 export interface UserLoginResponse {
   readonly tokens: UserTokenPair;
-  readonly user: UserUser;
 }
 
 export interface UserRefreshTokenRequest {
@@ -395,13 +386,11 @@ export interface UserUpdateMeRequest {
   avatarUrl?: string;
 }
 
-export interface UserUpdateMeResponse {
-  readonly user: UserUser;
-}
-
 export interface UserUpdateUserResponse {
   readonly user: UserUser;
 }
+
+export type UserServiceUpdateMe200 = { [key: string]: unknown };
 
 export type PostServiceListMyCollectionsParams = {
 pageSize?: number;
@@ -434,6 +423,8 @@ search?: string;
 
 export type PostServiceDeletePost200 = { [key: string]: unknown };
 
+export type PostServiceUpdatePost200 = { [key: string]: unknown };
+
 export type PostServiceCollectPost200 = { [key: string]: unknown };
 
 export type PostServiceLikePost200 = { [key: string]: unknown };
@@ -444,6 +435,8 @@ pageToken?: string;
 filter?: string;
 orderBy?: string;
 };
+
+export type UserServiceCreateUser200 = { [key: string]: unknown };
 
 export type UserServiceDeleteUser200 = { [key: string]: unknown };
 
@@ -925,7 +918,7 @@ export const userServiceUpdateMe = (
 ) => {
       
       
-      return customInstance<UserUpdateMeResponse>(
+      return customInstance<UserServiceUpdateMe200>(
       {url: `/api/v1/me`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: userUpdateMeRequest, signal
@@ -1638,7 +1631,7 @@ export const postServiceUpdatePost = (
 ) => {
       
       
-      return customInstance<PostUpdatePostResponse>(
+      return customInstance<PostServiceUpdatePost200>(
       {url: `/api/v1/posts/${uid}`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: postServiceUpdatePostBody, signal
@@ -1924,7 +1917,7 @@ export const userServiceCreateUser = (
 ) => {
       
       
-      return customInstance<UserCreateUserResponse>(
+      return customInstance<UserServiceCreateUser200>(
       {url: `/api/v1/users`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: userCreateUserRequest, signal

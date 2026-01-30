@@ -2,7 +2,7 @@ import { defineConfig } from "orval";
 
 export default defineConfig({
   api: {
-    input: { target: "./openapi.json" },
+    input: { target: "./openapi.swagger.json" },
     output: {
       client: "react-query",
       httpClient: "axios",

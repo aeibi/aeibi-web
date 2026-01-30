@@ -80,11 +80,19 @@ export function LoginPage() {
           </button>
         </form>
 
-        <div className="text-sm text-muted">
-          还没有账号？{" "}
-          <Link className="text-primary" to="/register">
-            去注册
-          </Link>
+        <div className="flex w-full items-center justify-between text-sm text-muted">
+          <div>
+            还没有账号？{" "}
+            <Link className="text-primary" to="/register">
+              去注册
+            </Link>
+          </div>
+          <div>
+            不想登录？{" "}
+            <Link className="text-primary" to="/">
+              先逛逛
+            </Link>
+          </div>
         </div>
       </div>
     </div>

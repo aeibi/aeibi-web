@@ -15,12 +15,8 @@
       "name": "UserService"
     }
   ],
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
   "paths": {
     "/api/v1/auth/login": {
       "post": {
@@ -50,9 +46,7 @@
             }
           }
         ],
-        "tags": [
-          "UserService"
-        ]
+        "tags": ["UserService"]
       }
     },
     "/api/v1/auth/refresh": {
@@ -83,9 +77,7 @@
             }
           }
         ],
-        "tags": [
-          "UserService"
-        ]
+        "tags": ["UserService"]
       }
     },
     "/api/v1/files": {
@@ -116,9 +108,7 @@
             }
           }
         ],
-        "tags": [
-          "FileService"
-        ]
+        "tags": ["FileService"]
       }
     },
     "/api/v1/files/content/{url}": {
@@ -148,9 +138,7 @@
             "pattern": ".+"
           }
         ],
-        "tags": [
-          "FileService"
-        ]
+        "tags": ["FileService"]
       }
     },
     "/api/v1/files/meta/{url}": {
@@ -180,9 +168,7 @@
             "pattern": ".+"
           }
         ],
-        "tags": [
-          "FileService"
-        ]
+        "tags": ["FileService"]
       }
     },
     "/api/v1/me": {
@@ -203,9 +189,7 @@
             }
           }
         },
-        "tags": [
-          "UserService"
-        ]
+        "tags": ["UserService"]
       },
       "patch": {
         "summary": "PATCH /api/v1/me 更新自己",
@@ -214,7 +198,8 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/userUpdateMeResponse"
+              "type": "object",
+              "properties": {}
             }
           },
           "default": {
@@ -234,9 +219,7 @@
             }
           }
         ],
-        "tags": [
-          "UserService"
-        ]
+        "tags": ["UserService"]
       }
     },
     "/api/v1/me/collections": {
@@ -296,9 +279,7 @@
             "type": "string"
           }
         ],
-        "tags": [
-          "PostService"
-        ]
+        "tags": ["PostService"]
       }
     },
     "/api/v1/me/password": {
@@ -330,9 +311,7 @@
             }
           }
         ],
-        "tags": [
-          "UserService"
-        ]
+        "tags": ["UserService"]
       }
     },
     "/api/v1/me/posts": {
@@ -392,9 +371,7 @@
             "type": "string"
           }
         ],
-        "tags": [
-          "PostService"
-        ]
+        "tags": ["PostService"]
       }
     },
     "/api/v1/me/posts/{uid}": {
@@ -423,9 +400,7 @@
             "type": "string"
           }
         ],
-        "tags": [
-          "PostService"
-        ]
+        "tags": ["PostService"]
       }
     },
     "/api/v1/posts": {
@@ -485,9 +460,7 @@
             "type": "string"
           }
         ],
-        "tags": [
-          "PostService"
-        ]
+        "tags": ["PostService"]
       },
       "post": {
         "summary": "POST /api/v1/posts 创建帖子",
@@ -516,9 +489,7 @@
             }
           }
         ],
-        "tags": [
-          "PostService"
-        ]
+        "tags": ["PostService"]
       }
     },
     "/api/v1/posts/{uid}": {
@@ -547,9 +518,7 @@
             "type": "string"
           }
         ],
-        "tags": [
-          "PostService"
-        ]
+        "tags": ["PostService"]
       },
       "delete": {
         "summary": "DELETE /api/v1/posts/{uid} 软删",
@@ -577,9 +546,7 @@
             "type": "string"
           }
         ],
-        "tags": [
-          "PostService"
-        ]
+        "tags": ["PostService"]
       },
       "patch": {
         "summary": "PATCH /api/v1/posts/{uid} 更新正文/媒体/标签/可见性",
@@ -588,7 +555,8 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/postUpdatePostResponse"
+              "type": "object",
+              "properties": {}
             }
           },
           "default": {
@@ -614,9 +582,7 @@
             }
           }
         ],
-        "tags": [
-          "PostService"
-        ]
+        "tags": ["PostService"]
       }
     },
     "/api/v1/posts/{uid}/collect": {
@@ -654,9 +620,7 @@
             }
           }
         ],
-        "tags": [
-          "PostService"
-        ]
+        "tags": ["PostService"]
       }
     },
     "/api/v1/posts/{uid}/like": {
@@ -694,9 +658,7 @@
             }
           }
         ],
-        "tags": [
-          "PostService"
-        ]
+        "tags": ["PostService"]
       }
     },
     "/api/v1/users": {
@@ -744,9 +706,7 @@
             "type": "string"
           }
         ],
-        "tags": [
-          "UserService"
-        ]
+        "tags": ["UserService"]
       },
       "post": {
         "summary": "POST /api/v1/users 创建用户",
@@ -755,7 +715,8 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/userCreateUserResponse"
+              "type": "object",
+              "properties": {}
             }
           },
           "default": {
@@ -775,9 +736,7 @@
             }
           }
         ],
-        "tags": [
-          "UserService"
-        ]
+        "tags": ["UserService"]
       }
     },
     "/api/v1/users/{uid}": {
@@ -806,9 +765,7 @@
             "type": "string"
           }
         ],
-        "tags": [
-          "UserService"
-        ]
+        "tags": ["UserService"]
       },
       "delete": {
         "summary": "DELETE /api/v1/users/{uid} 删除（软删）",
@@ -836,9 +793,7 @@
             "type": "string"
           }
         ],
-        "tags": [
-          "UserService"
-        ]
+        "tags": ["UserService"]
       },
       "patch": {
         "summary": "PATCH /api/v1/users/{uid} 更新",
@@ -873,9 +828,7 @@
             }
           }
         ],
-        "tags": [
-          "UserService"
-        ]
+        "tags": ["UserService"]
       }
     }
   },
@@ -1019,10 +972,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "file",
-        "url"
-      ]
+      "required": ["file", "url"]
     },
     "fileUploadFileRequest": {
       "type": "object",
@@ -1054,10 +1004,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "file",
-        "url"
-      ]
+      "required": ["file", "url"]
     },
     "postAttachment": {
       "type": "object",
@@ -1084,13 +1031,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "url",
-        "name",
-        "size",
-        "contentType",
-        "checksum"
-      ]
+      "required": ["url", "name", "size", "contentType", "checksum"]
     },
     "postCreatePostRequest": {
       "type": "object",
@@ -1132,9 +1073,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "uid"
-      ]
+      "required": ["uid"]
     },
     "postGetPostResponse": {
       "type": "object",
@@ -1144,9 +1083,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "post"
-      ]
+      "required": ["post"]
     },
     "postListPostsResponse": {
       "type": "object",
@@ -1169,11 +1106,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "posts",
-        "nextPageToken",
-        "totalSize"
-      ]
+      "required": ["posts", "nextPageToken", "totalSize"]
     },
     "postPost": {
       "type": "object",
@@ -1289,11 +1222,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "uid",
-        "nickname",
-        "avatarUrl"
-      ]
+      "required": ["uid", "nickname", "avatarUrl"]
     },
     "postToggleAction": {
       "type": "string",
@@ -1303,18 +1232,6 @@
         "TOGGLE_ACTION_REMOVE"
       ],
       "default": "TOGGLE_ACTION_UNSPECIFIED"
-    },
-    "postUpdatePostResponse": {
-      "type": "object",
-      "properties": {
-        "uid": {
-          "type": "string",
-          "readOnly": true
-        }
-      },
-      "required": [
-        "uid"
-      ]
     },
     "protobufAny": {
       "type": "object",
@@ -1375,18 +1292,6 @@
         }
       }
     },
-    "userCreateUserResponse": {
-      "type": "object",
-      "properties": {
-        "user": {
-          "$ref": "#/definitions/userUser",
-          "readOnly": true
-        }
-      },
-      "required": [
-        "user"
-      ]
-    },
     "userGetMeResponse": {
       "type": "object",
       "properties": {
@@ -1395,9 +1300,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "user"
-      ]
+      "required": ["user"]
     },
     "userGetUserResponse": {
       "type": "object",
@@ -1407,9 +1310,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "user"
-      ]
+      "required": ["user"]
     },
     "userListUsersResponse": {
       "type": "object",
@@ -1432,11 +1333,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "users",
-        "nextPageToken",
-        "totalSize"
-      ]
+      "required": ["users", "nextPageToken", "totalSize"]
     },
     "userLoginRequest": {
       "type": "object",
@@ -1462,16 +1359,9 @@
         "tokens": {
           "$ref": "#/definitions/userTokenPair",
           "readOnly": true
-        },
-        "user": {
-          "$ref": "#/definitions/userUser",
-          "readOnly": true
         }
       },
-      "required": [
-        "tokens",
-        "user"
-      ]
+      "required": ["tokens"]
     },
     "userRefreshTokenRequest": {
       "type": "object",
@@ -1489,9 +1379,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "tokens"
-      ]
+      "required": ["tokens"]
     },
     "userTokenPair": {
       "type": "object",
@@ -1506,10 +1394,7 @@
         }
       },
       "title": "Tokens",
-      "required": [
-        "accessToken",
-        "refreshToken"
-      ]
+      "required": ["accessToken", "refreshToken"]
     },
     "userUpdateMeRequest": {
       "type": "object",
@@ -1528,18 +1413,6 @@
         }
       }
     },
-    "userUpdateMeResponse": {
-      "type": "object",
-      "properties": {
-        "user": {
-          "$ref": "#/definitions/userUser",
-          "readOnly": true
-        }
-      },
-      "required": [
-        "user"
-      ]
-    },
     "userUpdateUserResponse": {
       "type": "object",
       "properties": {
@@ -1548,9 +1421,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "user"
-      ]
+      "required": ["user"]
     },
     "userUser": {
       "type": "object",
@@ -1580,14 +1451,7 @@
           "readOnly": true
         }
       },
-      "required": [
-        "uid",
-        "username",
-        "role",
-        "email",
-        "nickname",
-        "avatarUrl"
-      ]
+      "required": ["uid", "username", "role", "email", "nickname", "avatarUrl"]
     }
   }
 }
