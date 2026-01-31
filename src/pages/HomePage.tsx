@@ -16,6 +16,7 @@ import {
   usePostServiceListPosts,
   useUserServiceGetMe,
   useFileServiceUploadFile,
+  usePostServiceDeletePost,
 } from "@/api/generated";
 import { formatFeedTime } from "@/lib/time";
 import { fileSha256, fileToBase64, formatFileSize } from "@/lib/file";
@@ -37,32 +38,12 @@ export function HomePage() {
 
   const { data: me, isSuccess: isMeSuccess } = useUserServiceGetMe();
   const { data: posts, isSuccess: isPostsSuccess } = usePostServiceListPosts();
+  const [hiddenPostUids, setHiddenPostUids] = useState<string[]>([]);
   const [composerContent, setComposerContent] = useState<PostComposerContent>({
     text: "",
     visibility: "PUBLIC",
   });
-  const { mutateAsync: uploadAttachment } = useFileServiceUploadFile({
-    mutation: {
-      onSuccess: (data) =>
-        setComposerContent({
-          ...composerContent,
-          attachments: (composerContent.attachments ?? []).concat({
-            url: data.url,
-            name: data.file.name,
-            size: formatFileSize(data.file.size),
-          }),
-        }),
-    },
-  });
-  const { mutateAsync: uploadImage } = useFileServiceUploadFile({
-    mutation: {
-      onSuccess: (data) =>
-        setComposerContent({
-          ...composerContent,
-          images: (composerContent.images ?? []).concat(data.url),
-        }),
-    },
-  });
+
   const { mutate: createPost } = usePostServiceCreatePost({
     mutation: {
       onSuccess: () => {
@@ -80,6 +61,30 @@ export function HomePage() {
       },
     });
   };
+
+  const { mutateAsync: uploadAttachment } = useFileServiceUploadFile({
+    mutation: {
+      onSuccess: (data) =>
+        setComposerContent({
+          ...composerContent,
+          attachments: (composerContent.attachments ?? []).concat({
+            url: data.url,
+            name: data.file.name,
+            size: formatFileSize(data.file.size),
+          }),
+        }),
+    },
+  });
+
+  const { mutateAsync: uploadImage } = useFileServiceUploadFile({
+    mutation: {
+      onSuccess: (data) =>
+        setComposerContent({
+          ...composerContent,
+          images: (composerContent.images ?? []).concat(data.url),
+        }),
+    },
+  });
 
   const onUploadImage = async (files: File[]) => {
     for (const file of files) {
@@ -99,6 +104,28 @@ export function HomePage() {
         data: { name: file.name, contentType: file.type, data, checksum },
       });
     }
+  };
+
+  const { mutate: deletePost } = usePostServiceDeletePost({
+    mutation: {
+      onSuccess: (_, variables) => {
+        setHiddenPostUids((prev) =>
+          prev.includes(variables.uid) ? prev : prev.concat(variables.uid),
+        );
+      },
+    },
+  });
+
+  const onReport = (postUid: string) => {
+    alert(`已举报动态 ${postUid}，感谢您的反馈！`);
+  };
+
+  const onDelete = (postUid: string) => {
+    deletePost({ uid: postUid });
+  };
+
+  const onEdit = (postUid: string) => {
+    console.log(`Edit post ${postUid}`);
   };
 
   return (
@@ -121,18 +148,24 @@ export function HomePage() {
           />
         )}
         {isPostsSuccess &&
-          posts.posts.map((post) => (
-            <PostCard
-              key={post.uid}
-              post={{
-                ...post,
-                time: formatFeedTime(new Date(1000 * Number(post.updatedAt))),
-                images: Array.from(post.images ?? []),
-                tags: Array.from(post.tags ?? []),
-                attachments: Array.from(post.attachments ?? []),
-              }}
-            />
-          ))}
+          posts.posts
+            .filter((post) => !hiddenPostUids.includes(post.uid))
+            .map((post) => (
+              <PostCard
+                key={post.uid}
+                post={{
+                  ...post,
+                  time: formatFeedTime(new Date(1000 * Number(post.updatedAt))),
+                  images: Array.from(post.images ?? []),
+                  tags: Array.from(post.tags ?? []),
+                  attachments: Array.from(post.attachments ?? []),
+                }}
+                isAuthor={me?.user.uid === post.author.uid}
+                onReport={() => onReport(post.uid)}
+                onDelete={() => onDelete(post.uid)}
+                onEdit={() => onEdit(post.uid)}
+              />
+            ))}
       </div>
       <div className="w-64 shrink-0 sticky top-0 self-start">
         <TrendingTopicsCard topics={trendingTopics} />

@@ -42,9 +42,19 @@ export type Post = {
 
 type PostCardProps = {
   post: Post;
+  isAuthor: boolean;
+  onReport: (post: Post) => void;
+  onDelete: (post: Post) => void;
+  onEdit: (post: Post) => void;
 };
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({
+  post,
+  isAuthor,
+  onReport,
+  onDelete,
+  onEdit,
+}: PostCardProps) {
   const handleDownloadAttachment = (attachment: PostAttachment) => {
     const url = getFileUrl(attachment.url);
     const link = document.createElement("a");
@@ -69,7 +79,41 @@ export function PostCard({ post }: PostCardProps) {
             {post.time}
           </button>
         </div>
-        <MoreHorizontal className="ml-auto h-4 w-4 text-muted cursor-pointer transition-colors hover:text-primary" />
+        <div className="relative ml-auto group">
+          <button
+            type="button"
+            className="p-1 text-muted transition-colors hover:text-primary"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </button>
+          <div className="pointer-events-none invisible absolute right-0 top-full z-10 flex min-w-35 flex-col gap-1 rounded-lg bg-surface p-2 opacity-0 shadow-lg ring-1 ring-black/5 transition group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:visible group-focus-within:opacity-100">
+            <button
+              type="button"
+              className="w-full rounded-md px-3 py-1.5 text-left text-sm text-muted transition-colors hover:bg-surface-subtle hover:text-primary"
+              onClick={() => onReport(post)}
+            >
+              举报
+            </button>
+            {isAuthor && (
+              <button
+                type="button"
+                className="w-full rounded-md px-3 py-1.5 text-left text-sm text-muted transition-colors hover:bg-surface-subtle hover:text-primary"
+                onClick={() => onDelete(post)}
+              >
+                删除
+              </button>
+            )}
+            {isAuthor && (
+              <button
+                type="button"
+                className="w-full rounded-md px-3 py-1.5 text-left text-sm text-muted transition-colors hover:bg-surface-subtle hover:text-primary"
+                onClick={() => onEdit(post)}
+              >
+                修改
+              </button>
+            )}
+          </div>
+        </div>
       </header>
 
       <div className="pl-8 space-y-2">
