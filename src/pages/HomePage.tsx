@@ -164,6 +164,7 @@ export function HomePage() {
                 onReport={() => onReport(post.uid)}
                 onDelete={() => onDelete(post.uid)}
                 onEdit={() => onEdit(post.uid)}
+                onClick={() => window.open(`/post/${post.uid}`, "_blank")}
               />
             ))}
       </div>

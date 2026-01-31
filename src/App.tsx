@@ -9,6 +9,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { TermsPage } from "./pages/TermsPage";
 import { TopicsPage } from "./pages/TopicsPage";
+import { PostDetailPage } from "./pages/PostDetailPage";
 import "./App.css";
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
       <Route path="/about" element={<AboutPage />} />
       <Route element={<AppLayout />}>
         <Route path="/home" element={<HomePage />} />
+        <Route path="/post/:uid" element={<PostDetailPage />} />
         <Route path="/topics" element={<TopicsPage />} />
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="/profile" element={<ProfilePage />} />

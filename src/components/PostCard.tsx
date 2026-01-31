@@ -46,6 +46,7 @@ type PostCardProps = {
   onReport: (post: Post) => void;
   onDelete: (post: Post) => void;
   onEdit: (post: Post) => void;
+  onClick?: () => void;
 };
 
 export function PostCard({
@@ -54,6 +55,7 @@ export function PostCard({
   onReport,
   onDelete,
   onEdit,
+  onClick,
 }: PostCardProps) {
   const handleDownloadAttachment = (attachment: PostAttachment) => {
     const url = getFileUrl(attachment.url);
@@ -65,9 +67,17 @@ export function PostCard({
     link.click();
     link.remove();
   };
+  const handleCardClick: React.MouseEventHandler<HTMLElement> = (e) => {
+    const el = e.target as HTMLElement;
+    if (el.closest("button, a, textarea, select, [role='button'], img")) return;
+    onClick?.();
+  };
 
   return (
-    <article className="p-4 space-y-4 bg-surface rounded-lg">
+    <article
+      className="p-4 space-y-4 bg-surface rounded-lg"
+      onClick={handleCardClick}
+    >
       <header className="flex gap-2 items-center w-full">
         <img
           src={getFileUrl(post.author.avatarUrl)}
@@ -154,6 +164,7 @@ export function PostCard({
           <div className="space-y-2">
             {post.attachments.slice(0, 4).map((attachment) => (
               <div
+                role="button"
                 key={`${post.uid}-attachment-${attachment.url}`}
                 className="flex items-center gap-4 p-2 bg-surface-subtle rounded-lg"
               >
