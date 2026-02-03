@@ -3,7 +3,7 @@ import {
   useFileServiceUploadFile,
   useUserServiceGetMe,
   useUserServiceUpdateMe,
-  type UserUpdateMeRequest,
+  type UserUpdateMeUser,
 } from "@/api/generated";
 import { fileSha256, fileToBase64, getFileUrl } from "@/lib/file";
 import { useEffect, useState } from "react";
@@ -12,11 +12,18 @@ import { useNavigate } from "react-router-dom";
 export function ProfilePage() {
   const navigate = useNavigate();
   const [error, setError] = useState<string>("");
-  const [form, setForm] = useState<UserUpdateMeRequest>({});
-  const { data: me, isSuccess, isLoading, isError } = useUserServiceGetMe();
+  const [form, setForm] = useState<UserUpdateMeUser>({});
+  const {
+    data: me,
+    refetch: refetchMe,
+    isSuccess,
+    isLoading,
+    isError,
+  } = useUserServiceGetMe();
   const { mutate, isPending } = useUserServiceUpdateMe({
     mutation: {
       onSuccess: () => {
+        refetchMe();
         setForm({});
         setError("");
       },
@@ -145,7 +152,7 @@ export function ProfilePage() {
           }
           className="w-full rounded-lg bg-primary text-white py-3 typo-control-action transition-opacity disabled:opacity-60"
         >
-          {isPending ? "注册中..." : "注册"}
+          {isPending ? "更新中..." : "更新"}
         </button>
       </form>
     </div>

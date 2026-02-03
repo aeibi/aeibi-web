@@ -12,9 +12,9 @@ export type PostComposerAttachment = {
 export type PostComposerContent = {
   text: string;
   visibility: "PUBLIC" | "PRIVATE";
-  tags?: string[];
-  images?: string[];
-  attachments?: PostComposerAttachment[];
+  tags: string[];
+  images: string[];
+  attachments: PostComposerAttachment[];
 };
 
 type PostComposerProps = {

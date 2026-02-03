@@ -42,12 +42,21 @@ export function HomePage() {
   const [composerContent, setComposerContent] = useState<PostComposerContent>({
     text: "",
     visibility: "PUBLIC",
+    tags: [],
+    images: [],
+    attachments: [],
   });
 
   const { mutate: createPost } = usePostServiceCreatePost({
     mutation: {
       onSuccess: () => {
-        setComposerContent({ text: "", visibility: "PUBLIC" });
+        setComposerContent({
+          text: "",
+          visibility: "PUBLIC",
+          tags: [],
+          images: [],
+          attachments: [],
+        });
         navigate(0);
       },
     },

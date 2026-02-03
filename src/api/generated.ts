@@ -51,13 +51,6 @@ export interface PostServiceUpdatePostBody {
   pinned?: boolean;
 }
 
-export interface UserServiceUpdateUserBody {
-  username?: string;
-  email?: string;
-  nickname?: string;
-  avatarUrl?: string;
-}
-
 /**
  * `Any` contains an arbitrary serialized protocol buffer message along with a
 URL that describes the type of the serialized message.
@@ -310,19 +303,14 @@ export interface PostGetPostResponse {
 
 export interface PostListPostsResponse {
   readonly posts: readonly PostPost[];
-  readonly nextPageToken: string;
-  readonly totalSize: string;
+  readonly nextCursorCreatedAt: string;
+  readonly nextCursorId: string;
 }
 
 export interface RpcStatus {
   code?: number;
   message?: string;
   details?: ProtobufAny[];
-}
-
-export interface UserChangePasswordRequest {
-  oldPassword?: string;
-  newPassword?: string;
 }
 
 export interface UserCreateUserRequest {
@@ -349,12 +337,6 @@ export interface UserGetUserResponse {
   readonly user: UserUser;
 }
 
-export interface UserListUsersResponse {
-  readonly users: readonly UserUser[];
-  readonly nextPageToken: string;
-  readonly totalSize: string;
-}
-
 export interface UserLoginRequest {
   account?: string;
   password?: string;
@@ -379,46 +361,37 @@ export interface UserRefreshTokenResponse {
   readonly tokens: UserTokenPair;
 }
 
-export interface UserUpdateMeRequest {
+export interface UserUpdateMeUser {
   username?: string;
   email?: string;
   nickname?: string;
   avatarUrl?: string;
 }
 
-export interface UserUpdateUserResponse {
-  readonly user: UserUser;
-}
-
 export type UserServiceUpdateMe200 = { [key: string]: unknown };
 
 export type PostServiceListMyCollectionsParams = {
-pageSize?: number;
-pageToken?: string;
-author?: string;
-tag?: string;
-visibility?: string;
-search?: string;
+/**
+ * unix seconds
+ */
+cursorCreatedAt?: string;
+cursorId?: string;
 };
 
-export type UserServiceChangePassword200 = { [key: string]: unknown };
-
 export type PostServiceListMyPostsParams = {
-pageSize?: number;
-pageToken?: string;
-author?: string;
-tag?: string;
-visibility?: string;
-search?: string;
+/**
+ * unix seconds
+ */
+cursorCreatedAt?: string;
+cursorId?: string;
 };
 
 export type PostServiceListPostsParams = {
-pageSize?: number;
-pageToken?: string;
-author?: string;
-tag?: string;
-visibility?: string;
-search?: string;
+/**
+ * unix seconds
+ */
+cursorCreatedAt?: string;
+cursorId?: string;
 };
 
 export type PostServiceDeletePost200 = { [key: string]: unknown };
@@ -429,16 +402,15 @@ export type PostServiceCollectPost200 = { [key: string]: unknown };
 
 export type PostServiceLikePost200 = { [key: string]: unknown };
 
-export type UserServiceListUsersParams = {
-pageSize?: number;
-pageToken?: string;
-filter?: string;
-orderBy?: string;
-};
-
 export type UserServiceCreateUser200 = { [key: string]: unknown };
 
-export type UserServiceDeleteUser200 = { [key: string]: unknown };
+export type PostServiceListPostsByAuthorParams = {
+/**
+ * unix seconds
+ */
+cursorCreatedAt?: string;
+cursorId?: string;
+};
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
@@ -913,7 +885,7 @@ export function useUserServiceGetMe<TData = Awaited<ReturnType<typeof userServic
  * @summary PATCH /api/v1/me 更新自己
  */
 export const userServiceUpdateMe = (
-    userUpdateMeRequest: UserUpdateMeRequest,
+    userUpdateMeUser: UserUpdateMeUser,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
@@ -921,7 +893,7 @@ export const userServiceUpdateMe = (
       return customInstance<UserServiceUpdateMe200>(
       {url: `/api/v1/me`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
-      data: userUpdateMeRequest, signal
+      data: userUpdateMeUser, signal
     },
       options);
     }
@@ -929,8 +901,8 @@ export const userServiceUpdateMe = (
 
 
 export const getUserServiceUpdateMeMutationOptions = <TError = ErrorType<RpcStatus>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceUpdateMe>>, TError,{data: UserUpdateMeRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof userServiceUpdateMe>>, TError,{data: UserUpdateMeRequest}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceUpdateMe>>, TError,{data: UserUpdateMeUser}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof userServiceUpdateMe>>, TError,{data: UserUpdateMeUser}, TContext> => {
 
 const mutationKey = ['userServiceUpdateMe'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -942,7 +914,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof userServiceUpdateMe>>, {data: UserUpdateMeRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof userServiceUpdateMe>>, {data: UserUpdateMeUser}> = (props) => {
           const {data} = props ?? {};
 
           return  userServiceUpdateMe(data,requestOptions)
@@ -956,18 +928,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UserServiceUpdateMeMutationResult = NonNullable<Awaited<ReturnType<typeof userServiceUpdateMe>>>
-    export type UserServiceUpdateMeMutationBody = UserUpdateMeRequest
+    export type UserServiceUpdateMeMutationBody = UserUpdateMeUser
     export type UserServiceUpdateMeMutationError = ErrorType<RpcStatus>
 
     /**
  * @summary PATCH /api/v1/me 更新自己
  */
 export const useUserServiceUpdateMe = <TError = ErrorType<RpcStatus>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceUpdateMe>>, TError,{data: UserUpdateMeRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceUpdateMe>>, TError,{data: UserUpdateMeUser}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof userServiceUpdateMe>>,
         TError,
-        {data: UserUpdateMeRequest},
+        {data: UserUpdateMeUser},
         TContext
       > => {
       return useMutation(getUserServiceUpdateMeMutationOptions(options), queryClient);
@@ -1065,70 +1037,6 @@ export function usePostServiceListMyCollections<TData = Awaited<ReturnType<typeo
 
 
 
-/**
- * @summary POST /api/v1/me/password 改密码
- */
-export const userServiceChangePassword = (
-    userChangePasswordRequest: UserChangePasswordRequest,
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
-) => {
-      
-      
-      return customInstance<UserServiceChangePassword200>(
-      {url: `/api/v1/me/password`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: userChangePasswordRequest, signal
-    },
-      options);
-    }
-  
-
-
-export const getUserServiceChangePasswordMutationOptions = <TError = ErrorType<RpcStatus>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceChangePassword>>, TError,{data: UserChangePasswordRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof userServiceChangePassword>>, TError,{data: UserChangePasswordRequest}, TContext> => {
-
-const mutationKey = ['userServiceChangePassword'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof userServiceChangePassword>>, {data: UserChangePasswordRequest}> = (props) => {
-          const {data} = props ?? {};
-
-          return  userServiceChangePassword(data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UserServiceChangePasswordMutationResult = NonNullable<Awaited<ReturnType<typeof userServiceChangePassword>>>
-    export type UserServiceChangePasswordMutationBody = UserChangePasswordRequest
-    export type UserServiceChangePasswordMutationError = ErrorType<RpcStatus>
-
-    /**
- * @summary POST /api/v1/me/password 改密码
- */
-export const useUserServiceChangePassword = <TError = ErrorType<RpcStatus>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceChangePassword>>, TError,{data: UserChangePasswordRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof userServiceChangePassword>>,
-        TError,
-        {data: UserChangePasswordRequest},
-        TContext
-      > => {
-      return useMutation(getUserServiceChangePasswordMutationOptions(options), queryClient);
-    }
-    
 /**
  * @summary GET /api/v1/me/posts 当前用户发布的列表（含 PRIVATE）
  */
@@ -1817,98 +1725,6 @@ export const usePostServiceLikePost = <TError = ErrorType<RpcStatus>,
     }
     
 /**
- * @summary GET /api/v1/users 列表
- */
-export const userServiceListUsers = (
-    params?: UserServiceListUsersParams,
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
-) => {
-      
-      
-      return customInstance<UserListUsersResponse>(
-      {url: `/api/v1/users`, method: 'GET',
-        params, signal
-    },
-      options);
-    }
-  
-
-
-
-export const getUserServiceListUsersQueryKey = (params?: UserServiceListUsersParams,) => {
-    return [
-    `/api/v1/users`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-    
-export const getUserServiceListUsersQueryOptions = <TData = Awaited<ReturnType<typeof userServiceListUsers>>, TError = ErrorType<RpcStatus>>(params?: UserServiceListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getUserServiceListUsersQueryKey(params);
-
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof userServiceListUsers>>> = ({ signal }) => userServiceListUsers(params, requestOptions, signal);
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type UserServiceListUsersQueryResult = NonNullable<Awaited<ReturnType<typeof userServiceListUsers>>>
-export type UserServiceListUsersQueryError = ErrorType<RpcStatus>
-
-
-export function useUserServiceListUsers<TData = Awaited<ReturnType<typeof userServiceListUsers>>, TError = ErrorType<RpcStatus>>(
- params: undefined |  UserServiceListUsersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof userServiceListUsers>>,
-          TError,
-          Awaited<ReturnType<typeof userServiceListUsers>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUserServiceListUsers<TData = Awaited<ReturnType<typeof userServiceListUsers>>, TError = ErrorType<RpcStatus>>(
- params?: UserServiceListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof userServiceListUsers>>,
-          TError,
-          Awaited<ReturnType<typeof userServiceListUsers>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUserServiceListUsers<TData = Awaited<ReturnType<typeof userServiceListUsers>>, TError = ErrorType<RpcStatus>>(
- params?: UserServiceListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary GET /api/v1/users 列表
- */
-
-export function useUserServiceListUsers<TData = Awaited<ReturnType<typeof userServiceListUsers>>, TError = ErrorType<RpcStatus>>(
- params?: UserServiceListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userServiceListUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getUserServiceListUsersQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-/**
  * @summary POST /api/v1/users 创建用户
  */
 export const userServiceCreateUser = (
@@ -2064,128 +1880,96 @@ export function useUserServiceGetUser<TData = Awaited<ReturnType<typeof userServ
 
 
 /**
- * @summary DELETE /api/v1/users/{uid} 删除（软删）
+ * @summary GET /api/v1/users/{uid}/posts 指定用户发布的列表（公开）
  */
-export const userServiceDeleteUser = (
+export const postServiceListPostsByAuthor = (
     uid: string,
+    params?: PostServiceListPostsByAuthorParams,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
-      return customInstance<UserServiceDeleteUser200>(
-      {url: `/api/v1/users/${uid}`, method: 'DELETE', signal
+      return customInstance<PostListPostsResponse>(
+      {url: `/api/v1/users/${uid}/posts`, method: 'GET',
+        params, signal
     },
       options);
     }
   
 
 
-export const getUserServiceDeleteUserMutationOptions = <TError = ErrorType<RpcStatus>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceDeleteUser>>, TError,{uid: string}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof userServiceDeleteUser>>, TError,{uid: string}, TContext> => {
 
-const mutationKey = ['userServiceDeleteUser'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
+export const getPostServiceListPostsByAuthorQueryKey = (uid: string,
+    params?: PostServiceListPostsByAuthorParams,) => {
+    return [
+    `/api/v1/users/${uid}/posts`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getPostServiceListPostsByAuthorQueryOptions = <TData = Awaited<ReturnType<typeof postServiceListPostsByAuthor>>, TError = ErrorType<RpcStatus>>(uid: string,
+    params?: PostServiceListPostsByAuthorParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListPostsByAuthor>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPostServiceListPostsByAuthorQueryKey(uid,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof postServiceListPostsByAuthor>>> = ({ signal }) => postServiceListPostsByAuthor(uid,params, requestOptions, signal);
 
       
 
+      
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof userServiceDeleteUser>>, {uid: string}> = (props) => {
-          const {uid} = props ?? {};
+   return  { queryKey, queryFn, enabled: !!(uid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postServiceListPostsByAuthor>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
-          return  userServiceDeleteUser(uid,requestOptions)
-        }
-
-
-
-        
+export type PostServiceListPostsByAuthorQueryResult = NonNullable<Awaited<ReturnType<typeof postServiceListPostsByAuthor>>>
+export type PostServiceListPostsByAuthorQueryError = ErrorType<RpcStatus>
 
 
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UserServiceDeleteUserMutationResult = NonNullable<Awaited<ReturnType<typeof userServiceDeleteUser>>>
-    
-    export type UserServiceDeleteUserMutationError = ErrorType<RpcStatus>
-
-    /**
- * @summary DELETE /api/v1/users/{uid} 删除（软删）
- */
-export const useUserServiceDeleteUser = <TError = ErrorType<RpcStatus>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceDeleteUser>>, TError,{uid: string}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof userServiceDeleteUser>>,
-        TError,
-        {uid: string},
-        TContext
-      > => {
-      return useMutation(getUserServiceDeleteUserMutationOptions(options), queryClient);
-    }
-    
+export function usePostServiceListPostsByAuthor<TData = Awaited<ReturnType<typeof postServiceListPostsByAuthor>>, TError = ErrorType<RpcStatus>>(
+ uid: string,
+    params: undefined |  PostServiceListPostsByAuthorParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListPostsByAuthor>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceListPostsByAuthor>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceListPostsByAuthor>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceListPostsByAuthor<TData = Awaited<ReturnType<typeof postServiceListPostsByAuthor>>, TError = ErrorType<RpcStatus>>(
+ uid: string,
+    params?: PostServiceListPostsByAuthorParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListPostsByAuthor>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof postServiceListPostsByAuthor>>,
+          TError,
+          Awaited<ReturnType<typeof postServiceListPostsByAuthor>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePostServiceListPostsByAuthor<TData = Awaited<ReturnType<typeof postServiceListPostsByAuthor>>, TError = ErrorType<RpcStatus>>(
+ uid: string,
+    params?: PostServiceListPostsByAuthorParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListPostsByAuthor>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary PATCH /api/v1/users/{uid} 更新
+ * @summary GET /api/v1/users/{uid}/posts 指定用户发布的列表（公开）
  */
-export const userServiceUpdateUser = (
-    uid: string,
-    userServiceUpdateUserBody: UserServiceUpdateUserBody,
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
-) => {
-      
-      
-      return customInstance<UserUpdateUserResponse>(
-      {url: `/api/v1/users/${uid}`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: userServiceUpdateUserBody, signal
-    },
-      options);
-    }
-  
 
+export function usePostServiceListPostsByAuthor<TData = Awaited<ReturnType<typeof postServiceListPostsByAuthor>>, TError = ErrorType<RpcStatus>>(
+ uid: string,
+    params?: PostServiceListPostsByAuthorParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postServiceListPostsByAuthor>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-export const getUserServiceUpdateUserMutationOptions = <TError = ErrorType<RpcStatus>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceUpdateUser>>, TError,{uid: string;data: UserServiceUpdateUserBody}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof userServiceUpdateUser>>, TError,{uid: string;data: UserServiceUpdateUserBody}, TContext> => {
+  const queryOptions = getPostServiceListPostsByAuthorQueryOptions(uid,params,options)
 
-const mutationKey = ['userServiceUpdateUser'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof userServiceUpdateUser>>, {uid: string;data: UserServiceUpdateUserBody}> = (props) => {
-          const {uid,data} = props ?? {};
-
-          return  userServiceUpdateUser(uid,data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UserServiceUpdateUserMutationResult = NonNullable<Awaited<ReturnType<typeof userServiceUpdateUser>>>
-    export type UserServiceUpdateUserMutationBody = UserServiceUpdateUserBody
-    export type UserServiceUpdateUserMutationError = ErrorType<RpcStatus>
-
-    /**
- * @summary PATCH /api/v1/users/{uid} 更新
- */
-export const useUserServiceUpdateUser = <TError = ErrorType<RpcStatus>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userServiceUpdateUser>>, TError,{uid: string;data: UserServiceUpdateUserBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof userServiceUpdateUser>>,
-        TError,
-        {uid: string;data: UserServiceUpdateUserBody},
-        TContext
-      > => {
-      return useMutation(getUserServiceUpdateUserMutationOptions(options), queryClient);
-    }
+  return { ...query, queryKey: queryOptions.queryKey };
+}
